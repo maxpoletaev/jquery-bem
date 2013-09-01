@@ -1,7 +1,6 @@
 /* @required jQuery */
 
-(function($, undefined)
-{
+(function($, undefined) {
 
 	/**
 	 * Config presets.
@@ -27,7 +26,7 @@
 	 * BEM version.
 	 * @private
 	 */
-	var version = '1.0.0-rc';
+	var version = '1.0.0-rc2';
 
 
 	/**
@@ -108,9 +107,18 @@
 					{
 						var event = key.replace(/^on/, '').toLowerCase();
 						
-						$this.each(function() {
-							$(this).bind(event, $.proxy(fn, scope, $(this)));
-						});
+						if ($this.length === 0)
+						{
+							var proxy = $.proxy(fn, scope, $( $this.selector ));
+							$(document).on(event, $this.selector, proxy);
+						}
+						else
+						{
+							$this.each(function() {
+								var proxy = $.proxy(fn, scope, $(this));
+								$(this).bind(event, proxy);
+							});
+						}
 					}
 				}
 
@@ -125,7 +133,7 @@
 					else
 					{
 						var key = key.replace(/[A-Z]/g, '-$&').toLowerCase();
-						var element = $this.getElement(key);
+						var element = $this.findElement(key);
 
 						me.decl(element, fn, scope);
 					}
@@ -139,7 +147,7 @@
 
 
 		/**
-		 * Set base config
+		 * Set base config.
 		 * @protected
 		 *
 		 * @param  {Object}  [_sugar]   Syntax sugar
@@ -392,13 +400,17 @@
 		 * @param  {Object}  $this  Nested Element
 		 * @return {Object|Bool}
 		 */
-		getBlock: function($this)
+		getParentBlock: function($this)
 		{
 			var blockName = this.getBlockName($this);
+			
+			var blockName = typeof blockName === 'object'?
+				blockName[blockName.length - 1] :
+				blockName
 
 			if (blockName)
 			{
-				 return $('.' + blockName);
+				 return $this.closest('.' + blockName);
 			}
 
 			return false;
@@ -417,6 +429,10 @@
 		{
 			var blockName = this.getBlockName($this);
 
+			var blockName = typeof blockName === 'object'?
+				blockName[blockName.length - 1] :
+				blockName
+
 			if (blockName)
 			{
 				return this._genElementClassName(blockName, elementKey);
@@ -427,20 +443,62 @@
 
 
 		/**
-		 * Get element object from block or other element.
+		 * Get child element object from block or other element.
 		 * @protected
 		 *
 		 * @param  {Object}  $this        Nested element
 		 * @param  {Object}  elementName  Element name
 		 * @return {Object|Bool}
 		 */
-		getElement: function($this, elementKey)
+		getChildElement: function($this, elementKey)
 		{
 			var elementName = this.getElementName($this, elementKey);
 
 			if (elementName !== undefined)
 			{
 				return $this.find('.' + elementName);
+			}
+
+			return false;
+		},
+
+
+		/**
+		 * Get parent element object from block or other element.
+		 * @protected
+		 *
+		 * @param  {Object}  $this        Nested element
+		 * @param  {Object}  elementName  Element name
+		 * @return {Object|Bool}
+		 */
+		getParentElement: function($this, elementKey)
+		{
+			var elementName = this.getElementName($this, elementKey);
+
+			if (elementName !== undefined)
+			{
+				return $this.closest('.' + elementName);
+			}
+
+			return false;
+		},
+
+
+		/**
+		 * Get siblings element.
+		 * @protected
+		 *
+		 * @param  {Object}  $this        Nested element
+		 * @param  {Object}  elementName  Element name
+		 * @return {Object|Bool}
+		 */
+		getSiblingsElement: function($this, elementKey)
+		{
+			var elementName = this.getElementName($this, elementKey);
+
+			if (elementName !== undefined)
+			{
+				return $this.siblings('.' + elementName).not($this);
 			}
 
 			return false;
@@ -553,24 +611,24 @@
 		return bem.byNotMod(this, key, value);
 	}
 
-	$.fn.getBlockName = function()
-	{
-		return bem.getBlockName(this);
-	}
-
 	$.fn.getBlock = function()
 	{
-		return bem.getBlock(this);
+		return bem.getParentBlock(this);
 	}
 
-	$.fn.getElementName = function(elementKey)
+	$.fn.parentElement = function(elementKey)
 	{
-		return bem.getElementName(this, elementKey);
+		return bem.getParentElement(this, elementKey);
 	}
 
-	$.fn.getElement = function(elementKey)
+	$.fn.findElement = function(elementKey)
 	{
-		return bem.getElement(this, elementKey);
+		return bem.getChildElement(this, elementKey);
+	}
+
+	$.fn.siblingsElement = function(elementKey)
+	{
+		return bem.getSiblingsElement(this, elementKey);
 	}
 
 })(jQuery, undefined);
