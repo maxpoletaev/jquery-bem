@@ -7,16 +7,15 @@
 	 * @private
 	 */
 	var defaults = {
-		sugar:
-		{
-			blockPrefix: ['b-', 'w-', 'l-', 'g-', 'i-'],
-			elementPrefix: '__',
-			modPrefix: ':',
+		sugar: {
+			namePrefix: '^[a-zA-Z0-9]{1,2}-',
+			namePattern: '[a-zA-Z0-9-]+',
+			elemPrefix: '__',
+			modPrefix: '_',
 			modDlmtr: '_'
 		},
 		
-		config:
-		{
+		config: {
 			//
 		}
 	};
@@ -26,7 +25,7 @@
 	 * BEM version.
 	 * @private
 	 */
-	var version = '1.0.0-rc2';
+	var version = '1.1.0-beta1';
 
 
 	/**
@@ -47,7 +46,7 @@
 	 * Declarations for blocks.
 	 * @private
 	 */
-	var decls = {};
+	var decls = [];
 
 
 	/* 
@@ -60,26 +59,23 @@
 		 * Init base class.
 		 * @private
 		 */
-		init: function()
-		{
+		init: function() {
 			this.setConfig();
 			return this;
 		},
 
 
 		/**
-		 * Extend interface for modules.
+		 * Extender interface for modules.
 		 * @protected
 		 *
 		 * @param  {String}  moduleName  Module namespace
 		 * @param  {Object}  object      Module object
 		 */
-		extend: function(moduleName, object)
-		{
+		extend: function(moduleName, object) {
 			this[moduleName] = object;
-			
-			if (this[moduleName].init !== undefined)
-			{
+
+			if (this[moduleName].init != undefined) {
 				this[moduleName].init();
 			}
 		},
@@ -89,60 +85,64 @@
 		 * Declarator for blocks.
 		 * @protected
 		 *
-		 * @param  {Object}  $this  Nested object
-		 * @param  {Object}  props  Declaration
-		 * @param  {Object}  scope  Scope
+		 * @param  {String|Object}  $this      Nested selector
+		 * @param  {Object}         props      Declaration
+		 * @param  {Object}         scope      Scope
+		 * @param  {Bool}           recursive  Recursive call
 		 */
-		decl: function($this, props, scope)
-		{
-			var me = this;
-			var props = props || {}
-			var scope = props;
+		decl: function(selector, props, scope, recursive) {
+			var self = this,
+				props = props || {},
+				scope = props,
+				recursive = recursive || false;
 
-			$.each(props, function(key, fn)
-			{
-				if (typeof fn === 'function')
-				{
-					if (key.indexOf('on') == 0)
-					{
-						var event = key.replace(/^on/, '').toLowerCase();
+			if (!recursive) {
+				decls.push({
+					selector: selector,
+					props: props
+				});
+			}
+
+			var selector = typeof selector == 'object'?
+				'.' + self._buildElemClass(selector.block, selector.elem) :
+				'.' + selector
+
+			$.each(props, function(key, fn) {
+				if (typeof fn == 'function') {
+					if (key.indexOf('on') == 0) {
+						var e = key.replace(/^on/, '').toLowerCase();
 						
-						if ($this.length === 0)
-						{
-							var proxy = $.proxy(fn, scope, $( $this.selector ));
-							$(document).on(event, $this.selector, proxy);
-						}
-						else
-						{
-							$this.each(function() {
-								var proxy = $.proxy(fn, scope, $(this));
-								$(this).bind(event, proxy);
-							});
-						}
+						$(selector).each(function() {
+							var $this = $(this), proxy = $.proxy(fn, scope, $this);
+							
+							$this
+								.off(e).on(e, proxy)
+								.trigger('ready');
+						});
 					}
 				}
-
-				else if (typeof fn == 'object')
-				{
-					if (key == 'onSetMod')
-					{
-						// @TODO:
-						// onSetMod: { 'key': function(), 'key2' : { 'value': function() } }
-					}
-
-					else
-					{
-						var key = key.replace(/[A-Z]/g, '-$&').toLowerCase();
-						var element = $this.findElement(key);
-
-						me.decl(element, fn, scope);
-					}
+				else if (typeof fn == 'object') {
+					var key = key.replace(/[A-Z]/g, '-$&').toLowerCase();
+					var block = self._getBlockClass(selector);
+					var elem = self._buildElemClass(block, key);
+					
+					self.decl(elem, fn, scope, 'recursive');
 				}
 			});
+		},
 
-			$this.trigger('ready');
 
-			return $this;
+		/**
+		 * Reload all declarations.
+		 * @protected
+		 */
+		reload: function() {
+			var self = this, _decls = decls;
+			decls = [];
+
+			$.each(_decls, function(i, decl) {
+				self.decl(decl.selector, decl.props);
+			});
 		},
 
 
@@ -153,10 +153,9 @@
 		 * @param  {Object}  [_sugar]   Syntax sugar
 		 * @param  {Object}  [_config]  Configuration
 		 */
-		setConfig: function(_sugar, _config)
-		{
-			var _sugar = _sugar || {};
-			var _config = _config || {}
+		setConfig: function(_sugar, _config, _decls) {
+			var _sugar = _sugar || {},
+				_config = _config || {}
 
 			sugar = $.extend(defaults.sugar, _sugar);
 			config = $.extend(defaults.config, _config);
@@ -164,34 +163,71 @@
 
 
 		/**
-		 * Get modifers of elements.
+		 * Return parent block of element.
 		 * @protected
 		 *
 		 * @param  {Object}  $this  Nested element
-		 * @return {Array}
+		 * @return {Object}
 		 */
-		getMods: function($this)
-		{
-			var mods = {};
-			var rawClass = $this.attr('class');
+		parentBlock: function($this) {
+			var blockClasses = this._extractBlocks($this);
+			return $this.closest('.' + blockClasses[0]);
+		},
 
-			if (rawClass !== undefined)
-			{
-				var classes = rawClass.split(' ');
 
-				$.each(classes, function(index, classname)
-				{
-					if (classname.indexOf(sugar.modPrefix) == 0)
-					{
-						var cleanClassname = classname.replace(sugar.modPrefix, '');
-						var mod = cleanClassname.split(sugar.modDlmtr);
+		/**
+		 * Find element in block.
+		 * @protected
+		 *
+		 * @param  {Object}  $this    Block element
+		 * @param  {String}  elemKey  Element name
+		 * @return {Object}
+		 */
+		findElem: function($this, elemKey) {
+			var blockName = this._getBlockClass($this),
+				elemName = this._buildElemClass(blockName, elemKey);
 
-						mods[ mod[0] ] = mod[1];
-					}
-				});
+			return $this.find('.' + elemName);
+		},
+
+
+		/**
+		 * Get value of modifer.
+		 * @protected
+		 *
+		 * @param  {Object}  $this   Nested element
+		 * @param  {String}  modKey  Modifer key
+		 * @return {String}
+		 */
+		getMod: function($this, modKey) {
+			var mods = this._extractMods($this);
+			
+			if (mods[modKey] != undefined) return mods[modKey];
+			return null;
+		},
+
+
+		/**
+		 * Check modifer of element.
+		 * @protected
+		 *
+		 * @param  {Object}  $this     Nested element
+		 * @param  {String}  modKey    Modifer key
+		 * @param  {String}  [modVal]  Modifer value
+		 * @return {Bool}
+		 */
+		hasMod: function($this, modKey, modVal) {
+			var mods = this._extractMods($this),
+				modVal = modVal || null;
+
+			if (modVal) {
+				if (mods[modKey] == modVal) return true;
+			}
+			else {
+				if (mods[modKey] != undefined) return true;
 			}
 
-			return mods;
+			return false;
 		},
 
 
@@ -200,28 +236,23 @@
 		 * @protected
 		 *
 		 * @param  {Object}  $this     Nested element
-		 * @param  {String}  modKey    Modifer name
+		 * @param  {String}  modKey    Modifer key
 		 * @param  {String}  [modVal]  Modifer value
-		 * @return {Object}
+		 * @param  {Object}
 		 */
-		setMod: function($this, modKey, modVal)
-		{
-			var mods = this.getMods($this);
-			var modVal = modVal || false;
+		setMod: function($this, modKey, modVal) {
+			var mods = this._extractMods($this),
+				baseName = this._getBaseClass($this),
+				modVal = modVal || 'yes';
 
-			if (modVal)
-			{
-				if (mods[modKey] !== undefined)
-				{
-					var oldMod = this._genModClassName(modKey, mods[modKey]);
-					$this.removeClass(oldMod);
-				}
-
-				var newMod = this._genModClassName(modKey, modVal);
-				$this.addClass(newMod);
+			if (mods[modKey] != undefined) {
+				var oldModName = this._buildModClass(baseName, modKey, mods[modKey]);
+				$this.removeClass(oldModName);
 			}
 
-			$this.trigger('setmod', [ modKey, modVal ]);
+			var newModName = this._buildModClass(baseName, modKey, modVal);
+			$this.addClass(newModName);
+
 			return $this;
 		},
 
@@ -231,333 +262,297 @@
 		 * @protected
 		 *
 		 * @param  {Object}  $this     Nested element
-		 * @param  {String}  modKey    Modifer name
+		 * @param  {String}  modKey    Modifer key
 		 * @param  {String}  [modVal]  Modifer value
-		 * @return {Object}
+		 * @param  {Object}
 		 */
-		delMod: function($this, modKey, modVal)
-		{
-			var self = this;
-			var modVal = modVal || false;
+		delMod: function($this, modKey, modVal) {
+			var modVal = modVal || null,
+				mods = this._extractMods($this),
+				baseName = this._getBaseClass($this);
 
-			$this.each(function()
-			{
-				var item = $(this);
-				var mods = item.getMods(this);
-
-				if (modVal)
-				{
-					var modName = self._genModClassName(modKey, modVal);
-					item.removeClass(modName);
+			if (modVal) {
+				if (mods[modKey] == modVal) {
+					var modName = this._buildModClass(baseName, modKey, mods[modKey]);
+					$this.removeClass(modName);
 				}
-				else
-				{
-					if (mods[modKey] !== undefined)
-					{
-						var modName = self._genModClassName(modKey, mods[modKey]);
-						item.removeClass(modName);
-					}
+			}
+			else {
+				if (mods[modKey] != undefined) {
+					var modName = this._buildModClass(baseName, modKey, mods[modKey]);
+					$this.removeClass(modName);
 				}
-
-				$this.trigger('delmod', [ modKey, modVal ]);
-			});
+			}
 
 			return $this;
 		},
 
 
 		/**
-		 * Get modifer value on element.
+		 * Filtering elements by modifer.
+		 * @prodtected
+		 *
+		 * @param  {Object}  $this      Nested element
+		 * @param  {String}  modKey     Modifer key
+		 * @param  {String}  [modVal]   Modifer value
+		 * @param  {Bool}    [inverse]  Use .not() instead .filter()
+		 * @param  {Object}
+		 */
+		byMod: function($this, modKey, modVal, inverse) {
+			var modVal = modVal || null,
+				inverse = inverse || false,
+				mods = this._extractMods($this),
+				baseName = this._getBaseClass($this);
+
+			if (modVal) {
+				if (mods[modKey] == modVal) {
+					var modName = this._buildModClass(baseName, modKey, mods[modKey]);
+				}
+			}
+			else {
+				if (mods[modKey] != undefined) {
+					var modName = this._buildModClass(baseName, modKey, mods[modKey]);
+				}
+			}
+
+			return inverse?
+				$this.not('.' + modName) :
+				$this.filter('.' + modName);
+		},
+
+
+		/**
+		 * Get block names from element.
 		 * @protected
 		 *
-		 * @param  {Object}  $this     Nested element
-		 * @param  {String}  modKey    Modifer name
-		 * @return {String|Bool}
-		 */
-		getMod: function($this, modKey)
-		{
-			var mods = this.getMods($this);
-
-			if (mods[modKey] !== undefined)
-			{
-				return mods[modKey];
-			}
-
-			return false;
-		},
-
-
-		/**
-		 * Check modifer on element.
-		 * @protected
-		 *
-		 * @param  {Object}  $this     Nested element
-		 * @param  {String}  modKey    Modifer name
-		 * @param  {String}  [modVal]  Modifer value
-		 * @return {Bool}
-		 */
-		hasMod: function($this, modKey, modVal)
-		{
-			var mods = this.getMods($this);
-			var modVal = modVal || false;
-
-			if (modVal)
-			{
-				if (mods[modKey] == modVal) return true;
-			}
-			
-			else
-			{
-				if (mods[modKey] !== undefined) return true;
-			}
-
-			return false;
-		},
-
-
-		/**
-		 * Filtering element or block by modifer.
-		 * @protected
-		 * 
-		 * @param  {Object}  $this   Nested object
-		 * @param  {String}  modKey  Modifer name
-		 * @param  {String}  modVal  Modifer value
+		 * @param  {Object|String}  $this  Nested element
 		 * @return {Object}
 		 */
-		byMod: function($this, modKey, modVal)
-		{
-			var mods = this.getMods($this);
-			var modVal = modVal || mods[modKey];
+		_extractBlocks: function($this) {
+			var self = this, result = [];
+			var selectors = this._getClasses($this);
 			
-			var modName = this._genModClassName(modKey, modVal);
+			$.each(selectors, function(i, sel) {
+				var type = self._getClassType(sel);
 
-			return $this.filter('.\\' + modName);
+				if (type == 'block') {
+					result.push(sel);
+				}
+				else if (type == 'elem') {
+					var elem = sel.split(sugar.elemPrefix);
+					result.push(elem[0]);
+				}
+			});
+
+			return result;
 		},
 
 
 		/**
-		 * Filtering element or blocks by not modifer.
-		 * @protected
-		 * 
-		 * @param  {Object}  $this   Nested object
-		 * @param  {String}  modKey  Modifer name
-		 * @param  {String}  modVal  Modifer value
-		 * @return {Object}
-		 */
-		byNotMod: function($this, modKey, modVal)
-		{
-			var mods = this.getMods($this);
-			var modVal = modVal || mods[modKey];
-
-			var modName = this._genModClassName(modKey, modVal);
-			
-			return $this.not('.\\' + modName);
-		},
-
-
-		/**
-		 * Get block name from element or block.
+		 * Get element names from element.
 		 * @protected
 		 *
 		 * @param  {Object}  $this  Nested element
-		 * @return {String|Bool}
+		 * @return {Object}
 		 */
-		getBlockName: function($this)
-		{
-			var blockName = [];
-			var rawClass = $this.attr('class');
+		_extractElems: function($this) {
+			return [];
+		},
 
-			if (this._selectorIsBlock($this.selector))
-			{
-				return $this.selector.replace(/^\./, '');
-			}
 
-			if (rawClass !== undefined)
-			{
-				var classes = rawClass.split(' ');
+		/**
+		 * Get modifers from element.
+		 * @protected
+		 *
+		 * @param  {Object}  $this  Nested element
+		 * @return {Object}
+		 */
+		_extractMods: function($this) {
+			var self = this, result = {};
 
-				$.each(rawClass.split(' '), function(index, className)
-				{
-					$.each(sugar.blockPrefix, function(index, prefix)
-					{
-						if (className.indexOf(prefix) == 0)
-						{
-							var parts = className.split(sugar.elementPrefix);
-							blockName.push(parts[0]);
-						}
-					});
+			$this.each(function() {
+				var $this = $(this);
+				
+				$.each(self._getClasses($this), function(i, className) {
+					if (self._getClassType(className) == 'mod') {
+						var re = self._buildModClassRe().exec(className);
+						var modName = re[1].split(sugar.modDlmtr);
+
+						result[ modName[0] ] = modName[1];
+					}
 				});
-			}
+			});
+			
+			return result;
+		},
 
+
+		/**
+		 * Get classes names from element.
+		 * @protected
+		 *
+		 * @param  {Object}  $this  Nested element
+		 * @return {Object}
+		 */
+		_getClasses: function($this) {
+			var classes, result = [];
+
+			if (typeof $this == 'object') {
+				if ($this.attr('class') != undefined) {
+					classes = $this.attr('class').split(' ');
+				}
+				else {
+					return null;
+				}
+			}
+			else {
+				classes = $this.split('.');
+			}
+			
+			$.each(classes, function(i, className) {
+				if (className != '') result.push(className);
+			});
+			
+			return result;
+		},
+
+
+		/**
+		 * Build regexp for blocks.
+		 * @protected
+		 *
+		 * @return {RegExp}
+		 */
+		_buildBlockClassRe: function() {
+			return new RegExp(
+				sugar.namePrefix + '(' + sugar.namePattern + ')$'
+			);
+		},
+
+
+		/**
+		 * Build regexp for elements.
+		 * @protected
+		 *
+		 * @return {RegExp}
+		 */
+		_buildElemClassRe: function() {
+			return new RegExp(
+				sugar.namePrefix + sugar.namePattern + sugar.elemPrefix + '(' + sugar.namePattern + ')$'
+			);
+		},
+
+
+		/**
+		 * Build regexp for modifers.
+		 * @protected
+		 *
+		 * @return {RegExp}
+		 */
+		_buildModClassRe: function() {
+			return new RegExp(
+				sugar.namePrefix + '.*' + sugar.modPrefix + '(' + sugar.namePattern + sugar.modDlmtr + sugar.namePattern + ')$'
+			);
+		},
+
+
+		/**
+		 * Build class name for block.
+		 * @protected
+		 *
+		 * @param  {String}  blockName  Block name
+		 * @return {String}
+		 */
+		_buildBlockClass: function(blockName) {
 			return blockName;
 		},
 
 
 		/**
-		 * Get parent block from element.
+		 * Build class name for element.
 		 * @protected
 		 *
-		 * @param  {Object}  $this  Nested Element
-		 * @return {Object|Bool}
-		 */
-		getParentBlock: function($this)
-		{
-			var blockName = this.getBlockName($this);
-			
-			var blockName = typeof blockName === 'object'?
-				blockName[blockName.length - 1] :
-				blockName
-
-			if (blockName)
-			{
-				 return $this.closest('.' + blockName);
-			}
-
-			return false;
-		},
-
-
-		/**
-		 * Get element name from block.
-		 * @protected
-		 *
-		 * @param  {Object}  $this        Nested element
-		 * @param  {String}  elementKey   Element name
-		 * @return {String|Bool}
-		 */
-		getElementName: function($this, elementKey)
-		{
-			var blockName = this.getBlockName($this);
-
-			var blockName = typeof blockName === 'object'?
-				blockName[blockName.length - 1] :
-				blockName
-
-			if (blockName)
-			{
-				return this._genElementClassName(blockName, elementKey);
-			}
-			
-			return false;
-		},
-
-
-		/**
-		 * Get child element object from block or other element.
-		 * @protected
-		 *
-		 * @param  {Object}  $this        Nested element
-		 * @param  {Object}  elementName  Element name
-		 * @return {Object|Bool}
-		 */
-		getChildElement: function($this, elementKey)
-		{
-			var elementName = this.getElementName($this, elementKey);
-
-			if (elementName !== undefined)
-			{
-				return $this.find('.' + elementName);
-			}
-
-			return false;
-		},
-
-
-		/**
-		 * Get parent element object from block or other element.
-		 * @protected
-		 *
-		 * @param  {Object}  $this        Nested element
-		 * @param  {Object}  elementName  Element name
-		 * @return {Object|Bool}
-		 */
-		getParentElement: function($this, elementKey)
-		{
-			var elementName = this.getElementName($this, elementKey);
-
-			if (elementName !== undefined)
-			{
-				return $this.closest('.' + elementName);
-			}
-
-			return false;
-		},
-
-
-		/**
-		 * Get siblings element.
-		 * @protected
-		 *
-		 * @param  {Object}  $this        Nested element
-		 * @param  {Object}  elementName  Element name
-		 * @return {Object|Bool}
-		 */
-		getSiblingsElement: function($this, elementKey)
-		{
-			var elementName = this.getElementName($this, elementKey);
-
-			if (elementName !== undefined)
-			{
-				return $this.siblings('.' + elementName).not($this);
-			}
-
-			return false;
-		},
-
-
-		/**
-		 * Generate modifer classname.
-		 * @private
-		 *
-		 * @param  {String}  modKey  Modifer key
-		 * @param  {String}  modVal  Modifer value
+		 * @param  {String}  blockName  Block name
+		 * @param  {String}  elemKey    Element name
 		 * @return {String}
 		 */
-		_genModClassName: function(modKey, modVal)
-		{
-			return sugar.modPrefix + modKey + sugar.modDlmtr + modVal;
+		_buildElemClass: function(blockName, elemKey) {
+			return blockName + sugar.elemPrefix + elemKey;
 		},
 
-		
+
 		/**
-		 * Generate element class name.
-		 * @private
+		 * Build class name for modifer.
+		 * @protected
 		 *
-		 * @param  {String}  blockName   Block name
-		 * @param  {String}  elementKey  Element name
+		 * @param  {String}  blockName  Block name
+		 * @param  {String}  modKey     Modifer key
+		 * @param  {String}  modVal     Modifer value
 		 * @return {String}
 		 */
-		_genElementClassName: function(blockName, elementKey)
-		{
-			return blockName + sugar.elementPrefix + elementKey;
+		_buildModClass: function(baseClass, modKey, modVal) {
+			return baseClass + sugar.modPrefix + modKey + sugar.modDlmtr + modVal;
 		},
 
 
 		/**
-		 * Check selector is block.
-		 * @private
+		 * Build class name for block.
+		 * @protected
 		 *
-		 * @param  {String}  Selector
-		 * @return {Bool}
+		 * @param  {Object|String}  $this  Nested element
+		 * @return {String}
 		 */
-		_selectorIsBlock: function(selector)
-		{
-			var result = false;
+		_getBlockClass: function($this) {
+			var blockClasses = this._extractBlocks($this);
+			return blockClasses[0];
+		},
 
-			$.each(sugar.blockPrefix, function(index, prefix)
-			{
-				var re = new RegExp('^\.' + prefix, 'g');
-				
-				if (re.test(selector)
-					&& selector.indexOf(sugar.elementPrefix) == -1
-					&& selector.indexOf(sugar.modPrefix) == -1)
-				{
-					result = true;
-					return false;
+
+		/**
+		 * Get base class from element.
+		 * @protected
+		 *
+		 * @param  {Object}  $this  Nested element
+		 * @return {String}
+		 */
+		_getBaseClass: function($this) {
+			var self = this, baseClass = null;
+			var selectors = this._getClasses($this);
+
+			$.each(selectors, function(i, sel) {
+				var classType = self._getClassType(sel);
+
+				if (classType && classType != 'mod') {
+					baseClass = sel;
 				}
 			});
 
-			return result;
+			return baseClass;
+		},
+
+
+		/**
+		 * Get class type.
+		 * @protected
+		 *
+		 * @param  {String}  className  Class name
+		 * @return {String}
+		 */
+		_getClassType: function(className) {
+
+			if (this._buildModClassRe().test(className)) {
+				return 'mod';
+			}
+			
+			else if (this._buildElemClassRe().test(className)) {
+				return 'elem';
+			}
+			
+			else if (this._buildBlockClassRe().test(className)) {
+				return 'block';
+			}
+
+			return null;
 		}
 
 	};
@@ -568,67 +563,38 @@
 
 
 
-(function($, undefined)
-{
+(function($, undefined) {
 
-	$.fn.decl = function(props)
-	{
-		return bem.decl(this, props);
+	$.fn.up = function() {
+		return bem.parentBlock( $(this));
 	}
 
-	$.fn.setMod = function(key, value)
-	{
-		return bem.setMod(this, key, value);
+	$.fn.elem = function(elemKey) {
+		return bem.findElem( $(this), elemKey);
 	}
 
-	$.fn.delMod = function(key, value)
-	{
-		return bem.delMod(this, key, value);
+	$.fn.getMod = function(modKey) {
+		return bem.getMod( $(this), modKey);
 	}
 
-	$.fn.getMods = function()
-	{
-		return bem.getMods(this);
+	$.fn.hasMod = function(modKey, modVal) {
+		return bem.hasMod( $(this), modKey, modVal);
 	}
 
-	$.fn.getMod = function(key)
-	{
-		return bem.getMod(this, key);
+	$.fn.setMod = function(modKey, modVal) {
+		return bem.setMod( $(this), modKey, modVal);
 	}
 
-	$.fn.hasMod = function(key, value)
-	{
-		return bem.hasMod(this, key, value);
+	$.fn.delMod = function(modKey, modVal) {
+		return bem.delMod( $(this), modKey, modVal);
 	}
 
-	$.fn.byMod = function(key, value)
-	{
-		return bem.byMod(this, key, value);
+	$.fn.byMod = function(modKey, modVal) {
+		return bem.byMod( $(this), modKey, modVal);
 	}
 
-	$.fn.byNotMod = function(key, value)
-	{
-		return bem.byNotMod(this, key, value);
-	}
-
-	$.fn.getBlock = function()
-	{
-		return bem.getParentBlock(this);
-	}
-
-	$.fn.parentElement = function(elementKey)
-	{
-		return bem.getParentElement(this, elementKey);
-	}
-
-	$.fn.findElement = function(elementKey)
-	{
-		return bem.getChildElement(this, elementKey);
-	}
-
-	$.fn.siblingsElement = function(elementKey)
-	{
-		return bem.getSiblingsElement(this, elementKey);
+	$.fn.byNotMod = function(modKey, modVal) {
+		return bem.byMod( $(this), modKey, modVal, 'inverse');
 	}
 
 })(jQuery, undefined);
