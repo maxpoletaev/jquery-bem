@@ -25,7 +25,7 @@
 	 * BEM version.
 	 * @private
 	 */
-	var version = '1.1.0-beta1';
+	var version = '1.1.0-beta2';
 
 
 	/**
@@ -112,12 +112,12 @@
 					if (key.indexOf('on') == 0) {
 						var e = key.replace(/^on/, '').toLowerCase();
 						
-						$(selector).each(function() {
-							var $this = $(this), proxy = $.proxy(fn, scope, $this);
+						$(document).on(e, selector, function() {
+							var args = Array.prototype.slice.call(arguments);
+							var $this = $(this);
 							
-							$this
-								.off(e).on(e, proxy)
-								.trigger('ready');
+							args.unshift($this);
+							fn.apply(scope, args);
 						});
 					}
 				}
@@ -129,6 +129,8 @@
 					self.decl(elem, fn, scope, 'recursive');
 				}
 			});
+
+			$(selector).first().trigger('ready');
 		},
 
 
@@ -251,7 +253,10 @@
 			}
 
 			var newModName = this._buildModClass(baseName, modKey, modVal);
-			$this.addClass(newModName);
+			
+			$this
+				.addClass(newModName)
+				.trigger('setmod', [modKey, modVal]);
 
 			return $this;
 		},
@@ -274,13 +279,18 @@
 			if (modVal) {
 				if (mods[modKey] == modVal) {
 					var modName = this._buildModClass(baseName, modKey, mods[modKey]);
-					$this.removeClass(modName);
+					
+					$this
+						.removeClass(modName)
+						.trigger('delmod', [modKey, modVal]);;
 				}
 			}
 			else {
 				if (mods[modKey] != undefined) {
 					var modName = this._buildModClass(baseName, modKey, mods[modKey]);
-					$this.removeClass(modName);
+					$this
+						.removeClass(modName)
+						.trigger('delmod', [modKey, modVal]);;
 				}
 			}
 
