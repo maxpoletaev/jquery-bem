@@ -115,7 +115,7 @@
 							var $this = $(this);
 							
 							args.unshift($this);
-							fn.apply(scope, args);
+							return fn.apply(scope, args);
 						});
 					}
 				}
