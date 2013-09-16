@@ -25,7 +25,7 @@
 	 * BEM version.
 	 * @private
 	 */
-	var version = '1.1.0-beta2';
+	var version = '1.1.0-beta3';
 
 
 	/**
@@ -103,9 +103,7 @@
 				});
 			}
 
-			var selector = typeof selector == 'object'?
-				'.' + self._buildElemClass(selector.block, selector.elem) :
-				'.' + selector
+			var selector = self._buildSelector(selector);
 
 			$.each(props, function(key, fn) {
 				if (typeof fn == 'function') {
@@ -502,6 +500,36 @@
 		 */
 		_buildModClass: function(baseClass, modKey, modVal) {
 			return baseClass + sugar.modPrefix + modKey + sugar.modDlmtr + modVal;
+		},
+
+
+		/**
+		 * Build selector from object or string for declarator.
+		 * @private
+		 *
+		 * @param  {String|Object}  Selector name
+		 * @return {String}
+		 */
+		_buildSelector: function(selector) {
+			if (typeof selector == 'object') {
+				if (selector.block != undefined) {
+					var buildSelector = this._buildBlockClass(selector.block);
+					
+					if (selector.elem != undefined) {
+						buildSelector = this._buildElemClass(buildSelector, selector.elem);
+					}
+					
+					if (selector.mod != undefined) {
+						var mod = selector.mod.split(':');
+						buildSelector = this._buildModClass(buildSelector, mod[0], mod[1]);
+					}
+				}
+			}
+
+			return buildSelector != undefined?
+				'.' + buildSelector:
+				'.' + selector
+			;
 		},
 
 
