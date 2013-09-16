@@ -254,7 +254,8 @@
 			
 			$this
 				.addClass(newModName)
-				.trigger('setmod', [modKey, modVal]);
+				.trigger('setmod', [modKey, modVal])
+			;
 
 			return $this;
 		},
@@ -280,7 +281,8 @@
 					
 					$this
 						.removeClass(modName)
-						.trigger('delmod', [modKey, modVal]);;
+						.trigger('delmod', [modKey, modVal])
+					;
 				}
 			}
 			else {
@@ -288,7 +290,8 @@
 					var modName = this._buildModClass(baseName, modKey, mods[modKey]);
 					$this
 						.removeClass(modName)
-						.trigger('delmod', [modKey, modVal]);;
+						.trigger('delmod', [modKey, modVal])
+					;
 				}
 			}
 
@@ -325,7 +328,8 @@
 
 			return inverse?
 				$this.not('.' + modName) :
-				$this.filter('.' + modName);
+				$this.filter('.' + modName)
+			;
 		},
 
 
