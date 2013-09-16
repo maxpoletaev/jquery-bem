@@ -128,7 +128,9 @@
 				}
 			});
 
-			$(selector).first().trigger('ready');
+			$(function() {
+				$(selector).first().trigger('ready');
+			});
 		},
 
 
