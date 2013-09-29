@@ -25,7 +25,7 @@
 	 * BEM version.
 	 * @private
 	 */
-	var version = '1.1.0-beta3';
+	var version = '1.1.0-beta4';
 
 
 	/**
@@ -94,7 +94,8 @@
 			var self = this,
 				props = props || {},
 				scope = props,
-				recursive = recursive || false;
+				recursive = recursive || false
+			;
 
 			if (!recursive) {
 				decls.push({
@@ -158,6 +159,7 @@
 		setConfig: function(_sugar, _config, _decls) {
 			var _sugar = _sugar || {},
 				_config = _config || {}
+			;
 
 			sugar = $.extend(defaults.sugar, _sugar);
 			config = $.extend(defaults.config, _config);
@@ -165,15 +167,24 @@
 
 
 		/**
-		 * Return parent block of element.
+		 * Get parent block of element.
 		 * @protected
 		 *
-		 * @param  {Object}  $this  Nested element
+		 * @param  {Object}  $this  Element
+		 * @param  {String}  elem   Nested element
 		 * @return {Object}
 		 */
-		parentBlock: function($this) {
-			var blockClasses = this._extractBlocks($this);
-			return $this.closest('.' + blockClasses[0]);
+		getBlock: function($this, elem) {
+			var elem = elem || null,
+				blockClasses = this._extractBlocks($this),
+				block = $this.closest('.' + blockClasses[blockClasses.length - 1])
+			;
+			
+			if (elem) {
+				return block.elem(elem);
+			}
+
+			return block;
 		},
 
 
@@ -187,7 +198,8 @@
 		 */
 		findElem: function($this, elemKey) {
 			var blockName = this._getBlockClass($this),
-				elemName = this._buildElemClass(blockName, elemKey);
+				elemName = this._buildElemClass(blockName, elemKey)
+			;
 
 			return $this.find('.' + elemName);
 		},
@@ -220,7 +232,8 @@
 		 */
 		hasMod: function($this, modKey, modVal) {
 			var mods = this._extractMods($this),
-				modVal = modVal || null;
+				modVal = modVal || null
+			;
 
 			if (modVal) {
 				if (mods[modKey] == modVal) return true;
@@ -245,7 +258,8 @@
 		setMod: function($this, modKey, modVal) {
 			var mods = this._extractMods($this),
 				baseName = this._getBaseClass($this),
-				modVal = modVal || 'yes';
+				modVal = modVal || 'yes'
+			;
 
 			if (mods[modKey] != undefined) {
 				var oldModName = this._buildModClass(baseName, modKey, mods[modKey]);
@@ -275,7 +289,8 @@
 		delMod: function($this, modKey, modVal) {
 			var modVal = modVal || null,
 				mods = this._extractMods($this),
-				baseName = this._getBaseClass($this);
+				baseName = this._getBaseClass($this)
+			;
 
 			if (modVal) {
 				if (mods[modKey] == modVal) {
@@ -315,7 +330,8 @@
 			var modVal = modVal || null,
 				inverse = inverse || false,
 				mods = this._extractMods($this),
-				baseName = this._getBaseClass($this);
+				baseName = this._getBaseClass($this)
+			;
 
 			if (modVal) {
 				if (mods[modKey] == modVal) {
@@ -609,8 +625,8 @@
 
 (function($, undefined) {
 
-	$.fn.up = function() {
-		return bem.parentBlock( $(this));
+	$.fn.up = function(elem) {
+		return bem.getBlock( $(this), elem);
 	}
 
 	$.fn.elem = function(elemKey) {
