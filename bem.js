@@ -530,9 +530,14 @@
 		 * @private
 		 *
 		 * @param  {String|Object}  Selector name
+		 * @param  {String}         Selector prefix
 		 * @return {String}
 		 */
-		_buildSelector: function(selector) {
+		_buildSelector: function(selector, prefix) {
+			if (prefix !== '') {
+				var prefix = prefix || '.';
+			}
+
 			if (typeof selector == 'object') {
 				if (selector.block != undefined) {
 					var buildSelector = this._buildBlockClass(selector.block);
@@ -549,8 +554,8 @@
 			}
 
 			return buildSelector != undefined?
-				'.' + buildSelector:
-				'.' + selector
+				prefix + buildSelector:
+				prefix + selector
 			;
 		},
 
