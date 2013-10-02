@@ -25,7 +25,7 @@
 	 * BEM version.
 	 * @private
 	 */
-	var version = '1.1.0-beta4';
+	var version = '1.1.0-beta5';
 
 
 	/**
@@ -176,8 +176,8 @@
 		 */
 		getBlock: function($this, elem) {
 			var elem = elem || null,
-				blockClasses = this._extractBlocks($this),
-				block = $this.closest('.' + blockClasses[blockClasses.length - 1])
+				blockClass = this._getBlockClass($this),
+				block = $this.closest('.' + blockClass)
 			;
 			
 			if (elem) {
@@ -197,11 +197,21 @@
 		 * @return {Object}
 		 */
 		findElem: function($this, elemKey) {
-			var blockName = this._getBlockClass($this),
-				elemName = this._buildElemClass(blockName, elemKey)
+			var self = this,
+				result = $(),
+				blockNames = self._extractBlocks($this)
 			;
 
-			return $this.find('.' + elemName);
+			$.each(blockNames, function(i, blockName) {
+				var elemName = self._buildElemClass(blockName, elemKey);
+				var elem = $this.find('.' + elemName);
+
+				if (elem.length) {
+					result = result.add(elem);
+				}
+			});
+
+			return result;
 		},
 
 
@@ -214,7 +224,7 @@
 		 * @return {String}
 		 */
 		getMod: function($this, modKey) {
-			var mods = this._extractMods($this);
+			var mods = this._extractMods($this.first());
 			
 			if (mods[modKey] != undefined) return mods[modKey];
 			return null;
@@ -231,7 +241,7 @@
 		 * @return {Bool}
 		 */
 		hasMod: function($this, modKey, modVal) {
-			var mods = this._extractMods($this),
+			var mods = this._extractMods($this.first()),
 				modVal = modVal || null
 			;
 
@@ -256,23 +266,29 @@
 		 * @param  {Object}
 		 */
 		setMod: function($this, modKey, modVal) {
-			var mods = this._extractMods($this),
-				baseName = this._getBaseClass($this),
+			var self = this,
 				modVal = modVal || 'yes'
 			;
 
-			if (mods[modKey] != undefined) {
-				var oldModName = this._buildModClass(baseName, modKey, mods[modKey]);
-				$this.removeClass(oldModName);
-			}
+			$this.each(function() {
+				var current = $(this),
+					mods = self._extractMods(current),
+					baseName = self._getBaseClass(current)
+				;
 
-			var newModName = this._buildModClass(baseName, modKey, modVal);
+				if (mods[modKey] != undefined) {
+					var oldModName = self._buildModClass(baseName, modKey, mods[modKey]);
+					current.removeClass(oldModName);
+				}
+
+				var newModName = self._buildModClass(baseName, modKey, modVal);
+				
+				current
+					.addClass(newModName)
+					.trigger('setmod', [modKey, modVal])
+				;
+			});
 			
-			$this
-				.addClass(newModName)
-				.trigger('setmod', [modKey, modVal])
-			;
-
 			return $this;
 		},
 
@@ -287,30 +303,37 @@
 		 * @param  {Object}
 		 */
 		delMod: function($this, modKey, modVal) {
-			var modVal = modVal || null,
-				mods = this._extractMods($this),
-				baseName = this._getBaseClass($this)
+			var self = this,
+				modVal = modVal || null
 			;
 
-			if (modVal) {
-				if (mods[modKey] == modVal) {
-					var modName = this._buildModClass(baseName, modKey, mods[modKey]);
-					
-					$this
-						.removeClass(modName)
-						.trigger('delmod', [modKey, modVal])
-					;
+			$this.each(function() {
+				var current = $(this),
+					mods = self._extractMods(current),
+					baseName = self._getBaseClass(current)
+				;
+
+				if (modVal) {
+					if (mods[modKey] == modVal) {
+						var modName = self._buildModClass(baseName, modKey, mods[modKey]);
+						
+						current
+							.removeClass(modName)
+							.trigger('delmod', [modKey, modVal])
+						;
+					}
 				}
-			}
-			else {
-				if (mods[modKey] != undefined) {
-					var modName = this._buildModClass(baseName, modKey, mods[modKey]);
-					$this
-						.removeClass(modName)
-						.trigger('delmod', [modKey, modVal])
-					;
+				else {
+					if (mods[modKey] != undefined) {
+						var modName = self._buildModClass(baseName, modKey, mods[modKey]);
+						
+						current
+							.removeClass(modName)
+							.trigger('delmod', [modKey, modVal])
+						;
+					}
 				}
-			}
+			});
 
 			return $this;
 		},
@@ -327,27 +350,36 @@
 		 * @param  {Object}
 		 */
 		byMod: function($this, modKey, modVal, inverse) {
-			var modVal = modVal || null,
+			var self = this,
+				modVal = modVal || null,
 				inverse = inverse || false,
-				mods = this._extractMods($this),
-				baseName = this._getBaseClass($this)
+				result = $()
 			;
 
-			if (modVal) {
-				if (mods[modKey] == modVal) {
-					var modName = this._buildModClass(baseName, modKey, mods[modKey]);
-				}
-			}
-			else {
-				if (mods[modKey] != undefined) {
-					var modName = this._buildModClass(baseName, modKey, mods[modKey]);
-				}
-			}
+			$this.each(function() {
+				var current = $(this),
+					mods = self._extractMods(current),
+					baseName = self._getBaseClass(current)
+				;
 
-			return inverse?
-				$this.not('.' + modName) :
-				$this.filter('.' + modName)
-			;
+				if (modVal) {
+					if (mods[modKey] == modVal) {
+						var modName = self._buildModClass(baseName, modKey, mods[modKey]);
+					}
+				}
+				else {
+					if (mods[modKey] != undefined) {
+						var modName = self._buildModClass(baseName, modKey, mods[modKey]);
+					}
+				}
+
+				result = result.add(inverse?
+					current.not('.' + modName) :
+					current.filter('.' + modName)
+				);
+			});
+
+			return result;
 		},
 
 
@@ -569,7 +601,7 @@
 		 */
 		_getBlockClass: function($this) {
 			var blockClasses = this._extractBlocks($this);
-			return blockClasses[0];
+			return blockClasses[blockClasses.length - 1];
 		},
 
 
