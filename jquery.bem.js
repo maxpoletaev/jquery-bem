@@ -111,11 +111,12 @@
 					if (key.indexOf('on') == 0) {
 						var e = key.replace(/^on/, '').toLowerCase();
 						
-						$(document).on(e, selector, function() {
+						$(document).on(e, selector, function(ev) {
 							var args = Array.prototype.slice.call(arguments);
 							var $this = $(this);
 							
 							args.unshift($this);
+							ev.stopPropagation();
 							return fn.apply(scope, args);
 						});
 					}
