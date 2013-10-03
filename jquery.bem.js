@@ -7,7 +7,7 @@
 	 * @private
 	 */
 	var defaults = {
-		sugar: {
+		syntax: {
 			namePrefix: '^[a-zA-Z0-9]{1,2}-',
 			namePattern: '[a-zA-Z0-9-]+',
 			elemPrefix: '__',
@@ -25,14 +25,14 @@
 	 * BEM version.
 	 * @private
 	 */
-	var version = '1.1.0-beta5';
+	var version = '1.1.0-beta6';
 
 
 	/**
 	 * Syntax sugar.
 	 * @private
 	 */
-	var sugar = {};
+	var syntax = {};
 
 
 	/**
@@ -85,7 +85,7 @@
 		 * Declarator for blocks.
 		 * @protected
 		 *
-		 * @param  {String|Object}  $this      Nested selector
+		 * @param  {String|Object}  $this      Selector
 		 * @param  {Object}         props      Declaration
 		 * @param  {Object}         scope      Scope
 		 * @param  {Bool}           recursive  Recursive call
@@ -154,21 +154,22 @@
 		 * Set base config.
 		 * @protected
 		 *
-		 * @param  {Object}  [_sugar]   Syntax sugar
-		 * @param  {Object}  [_config]  Configuration
+		 * @param  {Object}  [updSyntax]  Syntax sugar
+		 * @param  {Object}  [updConfig]  Configuration
 		 */
-		setConfig: function(_sugar, _config, _decls) {
-			var _sugar = _sugar || {},
-				_config = _config || {}
+		setConfig: function(updSyntax, updConfig) {
+			var updSyntax = updSyntax || {},
+				updConfig = updConfig || {}
 			;
 
-			sugar = $.extend(defaults.sugar, _sugar);
-			config = $.extend(defaults.config, _config);
+			syntax = $.extend(defaults.syntax, updSyntax);
+			config = $.extend(defaults.config, updConfig);
 		},
 
 
 		/**
-		 * Get parent block of element.
+		 * Get parent block of element or
+		 * get siblings of element.
 		 * @protected
 		 *
 		 * @param  {Object}  $this  Element
@@ -193,7 +194,7 @@
 		 * Find element in block.
 		 * @protected
 		 *
-		 * @param  {Object}  $this    Block element
+		 * @param  {Object}  $this    DOM element
 		 * @param  {String}  elemKey  Element name
 		 * @return {Object}
 		 */
@@ -220,7 +221,7 @@
 		 * Get value of modifer.
 		 * @protected
 		 *
-		 * @param  {Object}  $this   Nested element
+		 * @param  {Object}  $this   DOM element
 		 * @param  {String}  modKey  Modifer key
 		 * @return {String}
 		 */
@@ -236,7 +237,7 @@
 		 * Check modifer of element.
 		 * @protected
 		 *
-		 * @param  {Object}  $this     Nested element
+		 * @param  {Object}  $this     DOM element
 		 * @param  {String}  modKey    Modifer key
 		 * @param  {String}  [modVal]  Modifer value
 		 * @return {Bool}
@@ -261,7 +262,7 @@
 		 * Set modifer on element.
 		 * @protected
 		 *
-		 * @param  {Object}  $this     Nested element
+		 * @param  {Object}  $this     DOM element
 		 * @param  {String}  modKey    Modifer key
 		 * @param  {String}  [modVal]  Modifer value
 		 * @param  {Object}
@@ -298,7 +299,7 @@
 		 * Delete modifer on element.
 		 * @protected
 		 *
-		 * @param  {Object}  $this     Nested element
+		 * @param  {Object}  $this     DOM element
 		 * @param  {String}  modKey    Modifer key
 		 * @param  {String}  [modVal]  Modifer value
 		 * @param  {Object}
@@ -344,7 +345,7 @@
 		 * Filtering elements by modifer.
 		 * @prodtected
 		 *
-		 * @param  {Object}  $this      Nested element
+		 * @param  {Object}  $this      DOM element
 		 * @param  {String}  modKey     Modifer key
 		 * @param  {String}  [modVal]   Modifer value
 		 * @param  {Bool}    [inverse]  Use .not() instead .filter()
@@ -388,7 +389,7 @@
 		 * Get block names from element.
 		 * @protected
 		 *
-		 * @param  {Object|String}  $this  Nested element
+		 * @param  {Object|String}  $this  DOM element
 		 * @return {Object}
 		 */
 		_extractBlocks: function($this) {
@@ -402,7 +403,7 @@
 					result.push(sel);
 				}
 				else if (type == 'elem') {
-					var elem = sel.split(sugar.elemPrefix);
+					var elem = sel.split(syntax.elemPrefix);
 					result.push(elem[0]);
 				}
 			});
@@ -415,7 +416,7 @@
 		 * Get element names from element.
 		 * @protected
 		 *
-		 * @param  {Object}  $this  Nested element
+		 * @param  {Object}  $this  DOM element
 		 * @return {Object}
 		 */
 		_extractElems: function($this) {
@@ -427,7 +428,7 @@
 		 * Get modifers from element.
 		 * @protected
 		 *
-		 * @param  {Object}  $this  Nested element
+		 * @param  {Object}  $this  DOM element
 		 * @return {Object}
 		 */
 		_extractMods: function($this) {
@@ -439,7 +440,7 @@
 				$.each(self._getClasses($this), function(i, className) {
 					if (self._getClassType(className) == 'mod') {
 						var re = self._buildModClassRe().exec(className);
-						var modName = re[1].split(sugar.modDlmtr);
+						var modName = re[1].split(syntax.modDlmtr);
 
 						result[ modName[0] ] = modName[1];
 					}
@@ -454,7 +455,7 @@
 		 * Get classes names from element.
 		 * @protected
 		 *
-		 * @param  {Object}  $this  Nested element
+		 * @param  {Object}  $this  DOM element
 		 * @return {Object}
 		 */
 		_getClasses: function($this) {
@@ -488,7 +489,7 @@
 		 */
 		_buildBlockClassRe: function() {
 			return new RegExp(
-				sugar.namePrefix + '(' + sugar.namePattern + ')$'
+				syntax.namePrefix + '(' + syntax.namePattern + ')$'
 			);
 		},
 
@@ -501,7 +502,7 @@
 		 */
 		_buildElemClassRe: function() {
 			return new RegExp(
-				sugar.namePrefix + sugar.namePattern + sugar.elemPrefix + '(' + sugar.namePattern + ')$'
+				syntax.namePrefix + syntax.namePattern + syntax.elemPrefix + '(' + syntax.namePattern + ')$'
 			);
 		},
 
@@ -514,7 +515,7 @@
 		 */
 		_buildModClassRe: function() {
 			return new RegExp(
-				sugar.namePrefix + '.*' + sugar.modPrefix + '(' + sugar.namePattern + sugar.modDlmtr + sugar.namePattern + ')$'
+				syntax.namePrefix + '.*' + syntax.modPrefix + '(' + syntax.namePattern + syntax.modDlmtr + syntax.namePattern + ')$'
 			);
 		},
 
@@ -540,7 +541,7 @@
 		 * @return {String}
 		 */
 		_buildElemClass: function(blockName, elemKey) {
-			return blockName + sugar.elemPrefix + elemKey;
+			return blockName + syntax.elemPrefix + elemKey;
 		},
 
 
@@ -554,7 +555,7 @@
 		 * @return {String}
 		 */
 		_buildModClass: function(baseClass, modKey, modVal) {
-			return baseClass + sugar.modPrefix + modKey + sugar.modDlmtr + modVal;
+			return baseClass + syntax.modPrefix + modKey + syntax.modDlmtr + modVal;
 		},
 
 
