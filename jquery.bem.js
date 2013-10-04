@@ -598,12 +598,20 @@
 		 * Build class name for block.
 		 * @protected
 		 *
-		 * @param  {Object|String}  $this  Nested element
+		 * @param  {Object|String}  $this    DOM element or class names
+		 * @param  {Integer}        [index]  Main class index 
 		 * @return {String}
 		 */
-		_getBlockClass: function($this) {
+		_getBlockClass: function($this, index) {
 			var blockClasses = this._extractBlocks($this);
-			return blockClasses[blockClasses.length - 1];
+			
+			if (index !== 0) {
+				var index = index || blockClasses.length - 1;
+			}
+
+			return index <= blockClasses.length - 1?
+				blockClasses[index] : null
+			;
 		},
 
 
@@ -611,7 +619,7 @@
 		 * Get base class from element.
 		 * @protected
 		 *
-		 * @param  {Object}  $this  Nested element
+		 * @param  {Object}  $this  DOM element
 		 * @return {String}
 		 */
 		_getBaseClass: function($this) {
