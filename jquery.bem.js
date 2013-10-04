@@ -25,7 +25,7 @@
 	 * BEM version.
 	 * @private
 	 */
-	var version = '1.1.0-beta6';
+	var version = '1.1.0-beta7';
 
 
 	/**
@@ -200,29 +200,22 @@
 		 */
 		findElem: function($this, elemKey) {
 			var self = this,
-				result = $(),
-				blockNames = self._extractBlocks($this)
+				blockClass = self._getBlockClass($this)
 			;
 
-			$.each(blockNames, function(i, blockName) {
-				var elemName = self._buildElemClass(blockName, elemKey);
-				var elem = $this.find('.' + elemName);
+			var elemName = self._buildElemClass(blockClass, elemKey);
+			var elem = $this.find('.' + elemName);
 
-				if (elem.length) {
-					result = result.add(elem);
-				}
-			});
-
-			return result;
+			return elem;
 		},
 
 
 		/**
-		 * Get value of modifer.
+		 * Get value of modifier.
 		 * @protected
 		 *
 		 * @param  {Object}  $this   DOM element
-		 * @param  {String}  modKey  Modifer key
+		 * @param  {String}  modKey  Modifier key
 		 * @return {String}
 		 */
 		getMod: function($this, modKey) {
@@ -234,12 +227,12 @@
 
 
 		/**
-		 * Check modifer of element.
+		 * Check modifier of element.
 		 * @protected
 		 *
 		 * @param  {Object}  $this     DOM element
-		 * @param  {String}  modKey    Modifer key
-		 * @param  {String}  [modVal]  Modifer value
+		 * @param  {String}  modKey    Modifier key
+		 * @param  {String}  [modVal]  Modifier value
 		 * @return {Bool}
 		 */
 		hasMod: function($this, modKey, modVal) {
@@ -259,22 +252,25 @@
 
 
 		/**
-		 * Set modifer on element.
+		 * Set modifier on element.
 		 * @protected
 		 *
 		 * @param  {Object}  $this     DOM element
-		 * @param  {String}  modKey    Modifer key
-		 * @param  {String}  [modVal]  Modifer value
+		 * @param  {String}  modKey    Modifier key
+		 * @param  {String}  [modVal]  Modifier value
 		 * @param  {Object}
 		 */
 		setMod: function($this, modKey, modVal) {
 			var self = this,
-				modVal = modVal || 'yes'
+				modVal = modVal || 'yes',
+				selector = $this.selector
 			;
 
 			$this.each(function() {
-				var current = $(this),
-					mods = self._extractMods(current),
+				var current = $(this);
+				current.selector = selector;
+
+				var	mods = self._extractMods(current),
 					baseName = self._getBaseClass(current)
 				;
 
@@ -296,22 +292,25 @@
 
 
 		/**
-		 * Delete modifer on element.
+		 * Delete modifier on element.
 		 * @protected
 		 *
 		 * @param  {Object}  $this     DOM element
-		 * @param  {String}  modKey    Modifer key
-		 * @param  {String}  [modVal]  Modifer value
+		 * @param  {String}  modKey    Modifier key
+		 * @param  {String}  [modVal]  Modifier value
 		 * @param  {Object}
 		 */
 		delMod: function($this, modKey, modVal) {
 			var self = this,
-				modVal = modVal || null
+				modVal = modVal || null,
+				selector = $this.selector
 			;
 
 			$this.each(function() {
-				var current = $(this),
-					mods = self._extractMods(current),
+				var current = $(this);
+				current.selector = selector;
+
+				var mods = self._extractMods(current),
 					baseName = self._getBaseClass(current)
 				;
 
@@ -342,12 +341,12 @@
 
 
 		/**
-		 * Filtering elements by modifer.
+		 * Filtering elements by modifier.
 		 * @prodtected
 		 *
 		 * @param  {Object}  $this      DOM element
-		 * @param  {String}  modKey     Modifer key
-		 * @param  {String}  [modVal]   Modifer value
+		 * @param  {String}  modKey     Modifier key
+		 * @param  {String}  [modVal]   Modifier value
 		 * @param  {Bool}    [inverse]  Use .not() instead .filter()
 		 * @param  {Object}
 		 */
@@ -355,12 +354,15 @@
 			var self = this,
 				modVal = modVal || null,
 				inverse = inverse || false,
+				selector = $this.selector,
 				result = $()
 			;
 
 			$this.each(function() {
-				var current = $(this),
-					mods = self._extractMods(current),
+				var current = $(this);
+				current.selector = selector;
+
+				var mods = self._extractMods(current),
 					baseName = self._getBaseClass(current)
 				;
 
@@ -381,6 +383,7 @@
 				);
 			});
 
+			result.selector = selector;
 			return result;
 		},
 
@@ -425,7 +428,7 @@
 
 
 		/**
-		 * Get modifers from element.
+		 * Get modifiers from element.
 		 * @protected
 		 *
 		 * @param  {Object}  $this  DOM element
@@ -462,19 +465,24 @@
 			var classes, result = [];
 
 			if (typeof $this == 'object') {
-				if ($this.attr('class') != undefined) {
+				
+				if ($this.selector != '') {
+					classes = $this.selector.split('.');
+				}
+				else if ($this.attr('class') != undefined) {
 					classes = $this.attr('class').split(' ');
 				}
 				else {
 					return null;
 				}
+
 			}
 			else {
 				classes = $this.split('.');
 			}
 			
 			$.each(classes, function(i, className) {
-				if (className != '') result.push(className);
+				if (className != '') result.push(className.trim());
 			});
 			
 			return result;
@@ -508,7 +516,7 @@
 
 
 		/**
-		 * Build regexp for modifers.
+		 * Build regexp for modifiers.
 		 * @protected
 		 *
 		 * @return {RegExp}
@@ -546,12 +554,12 @@
 
 
 		/**
-		 * Build class name for modifer.
+		 * Build class name for modifier.
 		 * @protected
 		 *
 		 * @param  {String}  blockName  Block name
-		 * @param  {String}  modKey     Modifer key
-		 * @param  {String}  modVal     Modifer value
+		 * @param  {String}  modKey     Modifier key
+		 * @param  {String}  modVal     Modifier value
 		 * @return {String}
 		 */
 		_buildModClass: function(baseClass, modKey, modVal) {
