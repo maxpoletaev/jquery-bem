@@ -113,7 +113,7 @@
 						
 						$(document).on(e, selector, function(ev) {
 							var args = Array.prototype.slice.call(arguments);
-							var $this = $(this);
+							var $this = $(this); $this.selector = selector;
 							
 							args.unshift($this);
 							ev.stopPropagation();
