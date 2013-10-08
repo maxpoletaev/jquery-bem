@@ -24,9 +24,9 @@ HTML:
 
 JS:
 
-	$('.b-product:first').elem('name');              // $('.b-product:firts > .b-product__name')
-	$('.b-product:first').elem('name').up();         // $('.b-product:firts > .b-product__name').closest('.b-product')
-	$('.b-product:first').elem('name').up('price');  // $('.b-product:firts > .b-product__name').siblings('.b-product__price')
+	$('.b-product:first').elem('name');              // $('.b-product:first > .b-product__name')
+	$('.b-product:first').elem('name').up();         // $('.b-product:first > .b-product__name').closest('.b-product')
+	$('.b-product:first').elem('name').up('price');  // $('.b-product:first > .b-product__name').siblings('.b-product__price')
 
 
 
