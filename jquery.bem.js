@@ -180,6 +180,7 @@
 			var elem = elem || null,
 				blockClass = this._getBlockClass($this),
 				block = $this.closest('.' + blockClass)
+				block.selector = blockClass;
 			;
 			
 			if (elem) {
