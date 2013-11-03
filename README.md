@@ -24,9 +24,9 @@ HTML:
 
 JS:
 
-	$('.b-product:first').elem('name');              // $('.b-product:first > .b-product__name')
-	$('.b-product:first').elem('name').up();         // $('.b-product:first > .b-product__name').closest('.b-product')
-	$('.b-product:first').elem('name').up('price');  // $('.b-product:first > .b-product__name').siblings('.b-product__price')
+	$('.b-product:first').elem('name');                // $('.b-product:first > .b-product__name')
+	$('.b-product:first').elem('name').root();         // $('.b-product:first > .b-product__name').closest('.b-product')
+	$('.b-product:first').elem('name').root('price');  // $('.b-product:first > .b-product__name').siblings('.b-product__price')
 
 
 
@@ -108,7 +108,7 @@ Declarations
 			title: {
 					onMouseover: function($this) {
 							// Add to root block "b-product" modifier "state" with a value "hover"
-							$this.up().setMod('state', 'hover');
+							$this.root().setMod('state', 'hover');
 
 							// Call the helper function.
 							this._customFunction();

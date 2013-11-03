@@ -681,7 +681,7 @@
 
 (function($, undefined) {
 
-	$.fn.up = function(elem) {
+	$.fn.root = function(elem) {
 		return bem.getBlock( $(this), elem);
 	}
 
