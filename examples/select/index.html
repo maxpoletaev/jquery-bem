@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Custom select demo &mash; jQuery.BEM</title>
+		<meta charset="utf-8" />
+
+		<link rel="stylesheet" href="select.css" />
+	</head>
+	<body class="b-page">
+		
+		<div class="l-container">
+			<div class="b-select">
+				<input type="hidden" class="b-select__input" />
+				<div class="b-select__value">
+					<div class="b-select__value-handle">&#9660;</div>
+					<div class="b-select__value-text">Select your location</div>
+				</div>
+				<ul class="b-select__list">
+					<li class="b-select__list-item" data-value="1">New York</li>
+					<li class="b-select__list-item" data-value="2">London</li>
+					<li class="b-select__list-item" data-value="3">Moscow</li>
+					<li class="b-select__list-item" data-value="4">Tokio</li>
+				</ul>
+			</div>
+		</div>
+
+		<script src="http://yandex.st/jquery/2.0.3/jquery.min.js"></script>
+		<script src="../../jquery.bem.js"></script>
+		<script src="select.js"></script>
+	</body>
+</html>
