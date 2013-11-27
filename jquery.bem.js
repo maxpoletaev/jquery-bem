@@ -424,7 +424,16 @@
 		 * @return {Object}
 		 */
 		_extractElems: function($this) {
-			return [];
+			var self = this, result = [];
+
+			$.each(self._getClasses($this), function(i, className) {
+				if (self._getClassType(className) == 'elem') {
+					var elemName = className.split(syntax.elemPrefix);
+					result.push(elemName[1]);
+				}
+			});
+
+			return result;
 		},
 
 
