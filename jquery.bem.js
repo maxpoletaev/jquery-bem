@@ -108,15 +108,29 @@
 
 			$.each(props, function(key, fn) {
 				if (typeof fn == 'function') {
+					
 					if (key.indexOf('on') == 0) {
-						var e = key.replace(/^on/, '').toLowerCase();
+						var event = key.replace(/^on/, '').toLowerCase();
 						
-						$(document).on(e, selector, function(ev) {
+						$(selector).on(event, function(e) {
 							var args = Array.prototype.slice.call(arguments);
 							var $this = $(this); $this.selector = selector;
 							
 							args.unshift($this);
-							ev.stopPropagation();
+							e.stopPropagation();
+							return fn.apply(scope, args);
+						});
+
+					}
+					else if (key.indexOf('live') == 0) {
+						var event = key.replace(/^live/, '').toLowerCase();
+						
+						$(document).on(event, selector, function(e) {
+							var args = Array.prototype.slice.call(arguments);
+							var $this = $(this); $this.selector = selector;
+							
+							args.unshift($this);
+							e.stopPropagation();
 							return fn.apply(scope, args);
 						});
 					}
