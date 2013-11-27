@@ -681,36 +681,38 @@
 
 (function($, undefined) {
 
-	$.fn.root = function(elem) {
-		return bem.getBlock( $(this), elem);
-	}
-
-	$.fn.elem = function(elemKey) {
-		return bem.findElem( $(this), elemKey);
-	}
-
-	$.fn.getMod = function(modKey) {
-		return bem.getMod( $(this), modKey);
-	}
-
-	$.fn.hasMod = function(modKey, modVal) {
-		return bem.hasMod( $(this), modKey, modVal);
-	}
-
-	$.fn.setMod = function(modKey, modVal) {
-		return bem.setMod( $(this), modKey, modVal);
-	}
-
-	$.fn.delMod = function(modKey, modVal) {
-		return bem.delMod( $(this), modKey, modVal);
-	}
-
-	$.fn.byMod = function(modKey, modVal) {
-		return bem.byMod( $(this), modKey, modVal);
-	}
-
-	$.fn.byNotMod = function(modKey, modVal) {
-		return bem.byMod( $(this), modKey, modVal, 'inverse');
-	}
+	$.fn.extend({
+		root: function(elem) {
+			return bem.getBlock(this, elem);
+		},
+		
+		elem: function(elemKey) {
+			return bem.findElem(this, elemKey);
+		},
+		
+		getMod: function(modKey) {
+			return bem.getMod(this, modKey);
+		},
+		
+		hasMod: function(modKey, modVal) {
+			return bem.hasMod(this, modKey, modVal);
+		},
+		
+		setMod: function(modKey, modVal) {
+			return bem.setMod(this, modKey, modVal);
+		},
+		
+		delMod: function(modKey, modVal) {
+			return bem.delMod(this, modKey, modVal);
+		},
+		
+		byMod: function(modKey, modVal) {
+			return bem.byMod(this, modKey, modVal);
+		},
+		
+		byNotMod: function(modKey, modVal) {
+			return bem.byMod(this, modKey, modVal, 'inverse');
+		}
+	});
 
 })(jQuery, undefined);
