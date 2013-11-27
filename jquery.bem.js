@@ -192,6 +192,26 @@
 
 
 		/**
+		 * Switch block context.
+		 *
+		 * @param  {Object}  $this   DOM element
+		 * @param  {String}  block   Block name
+		 * @param  {String}  [elem]  Element name
+		 * @return {Object}
+		 */
+		switchBlock: function($this, block, elem) {
+			var elem = elem || null;
+
+			elem?
+				$this.selector = bem._buildSelector({ block: block, elem: elem }):
+				$this.selector = bem._buildSelector({ block: block })
+			;
+
+			return $this;
+		},
+
+
+		/**
 		 * Find element in block.
 		 * @protected
 		 *
@@ -697,6 +717,10 @@
 		
 		elem: function(elemKey) {
 			return bem.findElem(this, elemKey);
+		},
+
+		switch: function(block, elem) {
+			return bem.switchBlock(this, block, elem);
 		},
 		
 		getMod: function(modKey) {
