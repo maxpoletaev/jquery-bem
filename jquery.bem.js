@@ -25,7 +25,7 @@
 	 * BEM version.
 	 * @private
 	 */
-	var version = '1.1.0';
+	var version = '1.1.1';
 
 
 	/**
@@ -108,15 +108,29 @@
 
 			$.each(props, function(key, fn) {
 				if (typeof fn == 'function') {
+					
 					if (key.indexOf('on') == 0) {
-						var e = key.replace(/^on/, '').toLowerCase();
+						var event = key.replace(/^on/, '').toLowerCase();
 						
-						$(document).on(e, selector, function(ev) {
+						$(selector).on(event, function(e) {
 							var args = Array.prototype.slice.call(arguments);
 							var $this = $(this); $this.selector = selector;
 							
 							args.unshift($this);
-							ev.stopPropagation();
+							e.stopPropagation();
+							return fn.apply(scope, args);
+						});
+
+					}
+					else if (key.indexOf('live') == 0) {
+						var event = key.replace(/^live/, '').toLowerCase();
+						
+						$(document).on(event, selector, function(e) {
+							var args = Array.prototype.slice.call(arguments);
+							var $this = $(this); $this.selector = selector;
+							
+							args.unshift($this);
+							e.stopPropagation();
 							return fn.apply(scope, args);
 						});
 					}
@@ -188,6 +202,26 @@
 			}
 
 			return block;
+		},
+
+
+		/**
+		 * Switch block context.
+		 *
+		 * @param  {Object}  $this   DOM element
+		 * @param  {String}  block   Block name
+		 * @param  {String}  [elem]  Element name
+		 * @return {Object}
+		 */
+		switchBlock: function($this, block, elem) {
+			var elem = elem || null;
+
+			elem?
+				$this.selector = bem._buildSelector({ block: block, elem: elem }):
+				$this.selector = bem._buildSelector({ block: block })
+			;
+
+			return $this;
 		},
 
 
@@ -424,7 +458,16 @@
 		 * @return {Object}
 		 */
 		_extractElems: function($this) {
-			return [];
+			var self = this, result = [];
+
+			$.each(self._getClasses($this), function(i, className) {
+				if (self._getClassType(className) == 'elem') {
+					var elemName = className.split(syntax.elemPrefix);
+					result.push(elemName[1]);
+				}
+			});
+
+			return result;
 		},
 
 
@@ -681,36 +724,42 @@
 
 (function($, undefined) {
 
-	$.fn.root = function(elem) {
-		return bem.getBlock( $(this), elem);
-	}
+	$.fn.extend({
+		root: function(elem) {
+			return bem.getBlock(this, elem);
+		},
+		
+		elem: function(elemKey) {
+			return bem.findElem(this, elemKey);
+		},
 
-	$.fn.elem = function(elemKey) {
-		return bem.findElem( $(this), elemKey);
-	}
-
-	$.fn.getMod = function(modKey) {
-		return bem.getMod( $(this), modKey);
-	}
-
-	$.fn.hasMod = function(modKey, modVal) {
-		return bem.hasMod( $(this), modKey, modVal);
-	}
-
-	$.fn.setMod = function(modKey, modVal) {
-		return bem.setMod( $(this), modKey, modVal);
-	}
-
-	$.fn.delMod = function(modKey, modVal) {
-		return bem.delMod( $(this), modKey, modVal);
-	}
-
-	$.fn.byMod = function(modKey, modVal) {
-		return bem.byMod( $(this), modKey, modVal);
-	}
-
-	$.fn.byNotMod = function(modKey, modVal) {
-		return bem.byMod( $(this), modKey, modVal, 'inverse');
-	}
+		switch: function(block, elem) {
+			return bem.switchBlock(this, block, elem);
+		},
+		
+		getMod: function(modKey) {
+			return bem.getMod(this, modKey);
+		},
+		
+		hasMod: function(modKey, modVal) {
+			return bem.hasMod(this, modKey, modVal);
+		},
+		
+		setMod: function(modKey, modVal) {
+			return bem.setMod(this, modKey, modVal);
+		},
+		
+		delMod: function(modKey, modVal) {
+			return bem.delMod(this, modKey, modVal);
+		},
+		
+		byMod: function(modKey, modVal) {
+			return bem.byMod(this, modKey, modVal);
+		},
+		
+		byNotMod: function(modKey, modVal) {
+			return bem.byMod(this, modKey, modVal, 'inverse');
+		}
+	});
 
 })(jQuery, undefined);
