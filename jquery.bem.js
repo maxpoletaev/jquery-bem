@@ -526,7 +526,7 @@
 			}
 			
 			$.each(classes, function(i, className) {
-				if (className != '') result.push(className.trim());
+				if (className != '') result.push($.trim(className));
 			});
 			
 			return result;
