@@ -648,7 +648,7 @@
       return $.BEM.findElem(this, elemKey);
     },
 
-    switch: function(block, elem) {
+    ctx: function(block, elem) {
       return $.BEM.switchBlock(this, block, elem);
     },
     
