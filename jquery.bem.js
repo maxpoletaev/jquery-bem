@@ -212,7 +212,7 @@
      */
     setMod: function($this, modKey, modVal) {
       var self = this
-        , modVal = modVal || 'yes'
+        , modVal = modVal || 'true'
         , selector = $this.selector;
 
       $this.each(function() {
@@ -650,22 +650,28 @@
 
     ctx: function(block, elem) {
       return $.BEM.switchBlock(this, block, elem);
-    },
+    },    
     
-    getMod: function(modKey) {
-      return $.BEM.getMod(this, modKey);
-    },
-    
-    hasMod: function(modKey, modVal) {
-      return $.BEM.hasMod(this, modKey, modVal);
-    },
-    
-    setMod: function(modKey, modVal) {
-      return $.BEM.setMod(this, modKey, modVal);
+    mod: function(modKey, modVal) {
+      if (typeof modVal == 'undefined') {
+        modVal = null;
+      }
+
+      if (modVal === false) {
+        return $.BEM.delMod(this, modKey);
+      }
+      
+      return (modVal != null)
+        ? $.BEM.setMod(this, modKey, modVal)
+        : $.BEM.getMod(this, modKey);
     },
     
     delMod: function(modKey, modVal) {
       return $.BEM.delMod(this, modKey, modVal);
+    },
+    
+    hasMod: function(modKey, modVal) {
+      return $.BEM.hasMod(this, modKey, modVal);
     },
     
     byMod: function(modKey, modVal) {
