@@ -2,84 +2,29 @@
 
 (function($, undefined) {
 
-  /**
-   * Config presets.
-   * @private
-   */
-  var defaults = {
-    syntax: {
-      namePrefix: '^[a-zA-Z0-9]{1,2}-',
-      namePattern: '[a-zA-Z0-9-]+',
-      elemPrefix: '__',
-      modPrefix: '_',
-      modDlmtr: '_'
-    },
-    
-    config: {
-      //
-    }
+  var BEM = function(config) {
+
+    /**
+     * Default configuration.
+     * @protected
+     */
+    this.config = config || {};
+
+    /**
+     * Pugin version.
+     * @protected
+     */
+    this.version = '1.2.0';
+
+    /**
+     * Declaration cache.
+     * @protected
+     */
+    this.decls = [];
+
   };
 
-
-  /**
-   * BEM version.
-   * @private
-   */
-  var version = '1.1.1';
-
-
-  /**
-   * Syntax sugar.
-   * @private
-   */
-  var syntax = {};
-
-
-  /**
-   * Configuration.
-   * @private
-   */
-  var config = {};
-
-
-  /**
-   * Declarations for blocks.
-   * @private
-   */
-  var decls = [];
-
-
-  /* 
-   * Base BEM object.
-   * @namespace
-   */
-  this.bem = {
-
-    /**
-     * Init base class.
-     * @private
-     */
-    init: function() {
-      this.setConfig();
-      return this;
-    },
-
-
-    /**
-     * Extender interface for modules.
-     * @protected
-     *
-     * @param  {String}  moduleName  Module namespace
-     * @param  {Object}  object      Module object
-     */
-    extend: function(moduleName, object) {
-      this[moduleName] = object;
-
-      if (this[moduleName].init != undefined) {
-        this[moduleName].init();
-      }
-    },
-
+  BEM.prototype = {
 
     /**
      * Declarator for blocks.
@@ -148,38 +93,6 @@
         $(selector).trigger('init');
       });
     },
-
-
-    /**
-     * Reload all declarations.
-     * @protected
-     */
-    reload: function() {
-      var self = this, _decls = decls;
-      decls = [];
-
-      $.each(_decls, function(i, decl) {
-        self.decl(decl.selector, decl.props);
-      });
-    },
-
-
-    /**
-     * Set base config.
-     * @protected
-     *
-     * @param  {Object}  [updSyntax]  Syntax sugar
-     * @param  {Object}  [updConfig]  Configuration
-     */
-    setConfig: function(updSyntax, updConfig) {
-      var updSyntax = updSyntax || {},
-        updConfig = updConfig || {}
-      ;
-
-      syntax = $.extend(defaults.syntax, updSyntax);
-      config = $.extend(defaults.config, updConfig);
-    },
-
 
     /**
      * Get parent block of element or
@@ -441,7 +354,7 @@
           result.push(sel);
         }
         else if (type == 'elem') {
-          var elem = sel.split(syntax.elemPrefix);
+          var elem = sel.split(self.config.elemPrefix);
           result.push(elem[0]);
         }
       });
@@ -462,7 +375,7 @@
 
       $.each(self._getClasses($this), function(i, className) {
         if (self._getClassType(className) == 'elem') {
-          var elemName = className.split(syntax.elemPrefix);
+          var elemName = className.split(self.config.elemPrefix);
           result.push(elemName[1]);
         }
       });
@@ -487,7 +400,7 @@
         $.each(self._getClasses($this), function(i, className) {
           if (self._getClassType(className) == 'mod') {
             var re = self._buildModClassRe().exec(className);
-            var modName = re[1].split(syntax.modDlmtr);
+            var modName = re[1].split(self.config.modDlmtr);
 
             result[ modName[0] ] = modName[1];
           }
@@ -541,7 +454,7 @@
      */
     _buildBlockClassRe: function() {
       return new RegExp(
-        syntax.namePrefix + '(' + syntax.namePattern + ')$'
+        this.config.namePrefix + '(' + this.config.namePattern + ')$'
       );
     },
 
@@ -554,7 +467,7 @@
      */
     _buildElemClassRe: function() {
       return new RegExp(
-        syntax.namePrefix + syntax.namePattern + syntax.elemPrefix + '(' + syntax.namePattern + ')$'
+        this.config.namePrefix + this.config.namePattern + this.config.elemPrefix + '(' + this.config.namePattern + ')$'
       );
     },
 
@@ -567,7 +480,7 @@
      */
     _buildModClassRe: function() {
       return new RegExp(
-        syntax.namePrefix + '.*' + syntax.modPrefix + '(' + syntax.namePattern + syntax.modDlmtr + syntax.namePattern + ')$'
+        this.config.namePrefix + '.*' + this.config.modPrefix + '(' + this.config.namePattern + this.config.modDlmtr + this.config.namePattern + ')$'
       );
     },
 
@@ -593,7 +506,7 @@
      * @return {String}
      */
     _buildElemClass: function(blockName, elemKey) {
-      return blockName + syntax.elemPrefix + elemKey;
+      return blockName + this.config.elemPrefix + elemKey;
     },
 
 
@@ -607,7 +520,7 @@
      * @return {String}
      */
     _buildModClass: function(baseClass, modKey, modVal) {
-      return baseClass + syntax.modPrefix + modKey + syntax.modDlmtr + modVal;
+      return baseClass + this.config.modPrefix + modKey + this.config.modDlmtr + modVal;
     },
 
 
@@ -716,50 +629,50 @@
 
   };
 
-  bem.init();
-  
-})(jQuery, undefined);
-
-
-
-(function($, undefined) {
+  $.BEM = new BEM({
+    namePrefix: '^[a-zA-Z0-9]{1,2}-',
+    namePattern: '[a-zA-Z0-9-]+',
+    elemPrefix: '__',
+    modPrefix: '_',
+    modDlmtr: '_'
+  });
 
   $.fn.extend({
     root: function(elem) {
-      return bem.getBlock(this, elem);
+      return $.BEM.getBlock(this, elem);
     },
     
     elem: function(elemKey) {
-      return bem.findElem(this, elemKey);
+      return $.BEM.findElem(this, elemKey);
     },
 
     switch: function(block, elem) {
-      return bem.switchBlock(this, block, elem);
+      return $.BEM.switchBlock(this, block, elem);
     },
     
     getMod: function(modKey) {
-      return bem.getMod(this, modKey);
+      return $.BEM.getMod(this, modKey);
     },
     
     hasMod: function(modKey, modVal) {
-      return bem.hasMod(this, modKey, modVal);
+      return $.BEM.hasMod(this, modKey, modVal);
     },
     
     setMod: function(modKey, modVal) {
-      return bem.setMod(this, modKey, modVal);
+      return $.BEM.setMod(this, modKey, modVal);
     },
     
     delMod: function(modKey, modVal) {
-      return bem.delMod(this, modKey, modVal);
+      return $.BEM.delMod(this, modKey, modVal);
     },
     
     byMod: function(modKey, modVal) {
-      return bem.byMod(this, modKey, modVal);
+      return $.BEM.byMod(this, modKey, modVal);
     },
     
     byNotMod: function(modKey, modVal) {
-      return bem.byMod(this, modKey, modVal, 'inverse');
+      return $.BEM.byMod(this, modKey, modVal, 'inverse');
     }
   });
-
+  
 })(jQuery, undefined);
