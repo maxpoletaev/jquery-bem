@@ -2,45 +2,51 @@
 
 (function($, undefined) {
 
+  /**
+   * Base BEM class.
+   * @constructor
+   */
   var BEM = function(config) {
 
     /**
      * Default configuration.
-     * @protected
+     * @type {Object}
      */
     this.config = config || {};
 
     /**
      * Pugin version.
-     * @protected
+     * @type {String}
      */
     this.version = '1.2.0';
 
     /**
      * Declaration cache.
-     * @protected
+     * @type {array}
      */
     this.decls = [];
 
   };
 
+  /**
+   * @extends BEM
+   */
   BEM.prototype = {
 
     /**
      * Declarator for blocks.
-     * @protected
+     * @public
      *
-     * @param  {String|Object}  $this      Selector
-     * @param  {Object}         props      Declaration
-     * @param  {Object}         scope      Scope
-     * @param  {Bool}           recursive  Recursive call
+     * @param {String|Object} $this
+     * @param {Object} props
+     * @param {Object} scope
+     * @param {Boolean} recursive
      */
     decl: function(selector, props, scope, recursive) {
-      var self = this,
-        props = props || {},
-        scope = props,
-        recursive = recursive || false
-      ;
+      var self = this
+        , props = props || {}
+        , scope = props
+        , recursive = recursive || false;
 
       if (!recursive) {
         decls.push({
@@ -97,18 +103,18 @@
     /**
      * Get parent block of element or
      * get siblings of element.
-     * @protected
+     * @public
      *
-     * @param  {Object}  $this  Element
-     * @param  {String}  elem   Nested element
+     * @param {Object} $this
+     * @param {String} elem
      * @return {Object}
      */
     getBlock: function($this, elem) {
-      var elem = elem || null,
-        blockClass = this._getBlockClass($this),
-        block = $this.closest('.' + blockClass)
-        block.selector = blockClass;
-      ;
+      var elem = elem || null
+        , blockClass = this._getBlockClass($this)
+        , block = $this.closest('.' + blockClass);
+
+      block.selector = blockClass;
       
       if (elem) {
         return block.elem(elem);
@@ -120,19 +126,19 @@
 
     /**
      * Switch block context.
+     * @public
      *
-     * @param  {Object}  $this   DOM element
-     * @param  {String}  block   Block name
-     * @param  {String}  [elem]  Element name
+     * @param {Object} $this
+     * @param {String} block
+     * @param {String} [elem]
      * @return {Object}
      */
     switchBlock: function($this, block, elem) {
       var elem = elem || null;
 
-      elem?
-        $this.selector = bem._buildSelector({ block: block, elem: elem }):
-        $this.selector = bem._buildSelector({ block: block })
-      ;
+      elem
+        ? $this.selector = this._buildSelector({ block: block, elem: elem })
+        : $this.selector = this._buildSelector({ block: block });
 
       return $this;
     },
@@ -140,19 +146,16 @@
 
     /**
      * Find element in block.
-     * @protected
+     * @public
      *
      * @param  {Object}  $this    DOM element
      * @param  {String}  elemKey  Element name
      * @return {Object}
      */
     findElem: function($this, elemKey) {
-      var self = this,
-        blockClass = self._getBlockClass($this)
-      ;
-
-      var elemName = self._buildElemClass(blockClass, elemKey);
-      var elem = $this.find('.' + elemName);
+      var blockClass = this._getBlockClass($this)
+        , elemName = this._buildElemClass(blockClass, elemKey)
+        , elem = $this.find('.' + elemName);
 
       return elem;
     },
@@ -160,10 +163,10 @@
 
     /**
      * Get value of modifier.
-     * @protected
+     * @public
      *
-     * @param  {Object}  $this   DOM element
-     * @param  {String}  modKey  Modifier key
+     * @param {Object} $this
+     * @param {String} modKey
      * @return {String}
      */
     getMod: function($this, modKey) {
@@ -176,17 +179,16 @@
 
     /**
      * Check modifier of element.
-     * @protected
+     * @public
      *
-     * @param  {Object}  $this     DOM element
-     * @param  {String}  modKey    Modifier key
-     * @param  {String}  [modVal]  Modifier value
-     * @return {Bool}
+     * @param {Object} $this
+     * @param {String} modKey
+     * @param {String} [modVal]
+     * @return {Boolean}
      */
     hasMod: function($this, modKey, modVal) {
-      var mods = this._extractMods($this.first()),
-        modVal = modVal || null
-      ;
+      var mods = this._extractMods($this.first())
+        , modVal = modVal || null;
 
       if (modVal) {
         if (mods[modKey] == modVal) return true;
@@ -201,26 +203,24 @@
 
     /**
      * Set modifier on element.
-     * @protected
+     * @public
      *
-     * @param  {Object}  $this     DOM element
-     * @param  {String}  modKey    Modifier key
-     * @param  {String}  [modVal]  Modifier value
-     * @param  {Object}
+     * @param {Object} $this
+     * @param {String} modKey
+     * @param {String} [modVal]
+     * @param {Object}
      */
     setMod: function($this, modKey, modVal) {
-      var self = this,
-        modVal = modVal || 'yes',
-        selector = $this.selector
-      ;
+      var self = this
+        , modVal = modVal || 'yes'
+        , selector = $this.selector;
 
       $this.each(function() {
         var current = $(this);
         current.selector = selector;
 
-        var mods = self._extractMods(current),
-          baseName = self._getBaseClass(current)
-        ;
+        var mods = self._extractMods(current)
+          , baseName = self._getBaseClass(current);
 
         if (mods[modKey] != undefined) {
           var oldModName = self._buildModClass(baseName, modKey, mods[modKey]);
@@ -231,8 +231,7 @@
         
         current
           .addClass(newModName)
-          .trigger('setmod', [modKey, modVal])
-        ;
+          .trigger('setmod', [modKey, modVal]);
       });
       
       return $this;
@@ -241,18 +240,17 @@
 
     /**
      * Delete modifier on element.
-     * @protected
+     * @public
      *
-     * @param  {Object}  $this     DOM element
-     * @param  {String}  modKey    Modifier key
-     * @param  {String}  [modVal]  Modifier value
-     * @param  {Object}
+     * @param {Object} $this
+     * @param {String} modKey
+     * @param {String} [modVal]
+     * @param {Object}
      */
     delMod: function($this, modKey, modVal) {
-      var self = this,
-        modVal = modVal || null,
-        selector = $this.selector
-      ;
+      var self = this
+        , modVal = modVal || null
+        , selector = $this.selector;
 
       $this.each(function() {
         var current = $(this);
@@ -290,29 +288,27 @@
 
     /**
      * Filtering elements by modifier.
-     * @prodtected
+     * @public
      *
-     * @param  {Object}  $this      DOM element
-     * @param  {String}  modKey     Modifier key
-     * @param  {String}  [modVal]   Modifier value
-     * @param  {Bool}    [inverse]  Use .not() instead .filter()
-     * @param  {Object}
+     * @param {Object} $this
+     * @param {String} modKey
+     * @param {String} [modVal]
+     * @param {Boolean} [inverse]
+     * @return {Object}
      */
     byMod: function($this, modKey, modVal, inverse) {
-      var self = this,
-        modVal = modVal || null,
-        inverse = inverse || false,
-        selector = $this.selector,
-        result = $()
-      ;
+      var self = this
+        , modVal = modVal || null
+        , inverse = inverse || false
+        , selector = $this.selector
+        , result = $();
 
       $this.each(function() {
         var current = $(this);
         current.selector = selector;
 
-        var mods = self._extractMods(current),
-          baseName = self._getBaseClass(current)
-        ;
+        var mods = self._extractMods(current)
+          , baseName = self._getBaseClass(current);
 
         if (modVal) {
           if (mods[modKey] == modVal) {
@@ -325,10 +321,9 @@
           }
         }
 
-        result = result.add(inverse?
-          current.not('.' + modName) :
-          current.filter('.' + modName)
-        );
+        result = result.add(inverse
+          ? current.not('.' + modName)
+          : current.filter('.' + modName));
       });
 
       result.selector = selector;
@@ -340,12 +335,12 @@
      * Get block names from element.
      * @protected
      *
-     * @param  {Object|String}  $this  DOM element
+     * @param {Object|String} $this
      * @return {Object}
      */
     _extractBlocks: function($this) {
-      var self = this, result = [];
-      var selectors = this._getClasses($this);
+      var self = this, result = []
+        , selectors = this._getClasses($this);
       
       $.each(selectors, function(i, sel) {
         var type = self._getClassType(sel);
@@ -367,7 +362,7 @@
      * Get element names from element.
      * @protected
      *
-     * @param  {Object}  $this  DOM element
+     * @param {Object} $this
      * @return {Object}
      */
     _extractElems: function($this) {
@@ -388,7 +383,7 @@
      * Get modifiers from element.
      * @protected
      *
-     * @param  {Object}  $this  DOM element
+     * @param {Object} $this
      * @return {Object}
      */
     _extractMods: function($this) {
@@ -415,7 +410,7 @@
      * Get classes names from element.
      * @protected
      *
-     * @param  {Object}  $this  DOM element
+     * @param {Object} $this
      * @return {Object}
      */
     _getClasses: function($this) {
@@ -489,7 +484,7 @@
      * Build class name for block.
      * @protected
      *
-     * @param  {String}  blockName  Block name
+     * @param {String} blockName
      * @return {String}
      */
     _buildBlockClass: function(blockName) {
@@ -501,8 +496,8 @@
      * Build class name for element.
      * @protected
      *
-     * @param  {String}  blockName  Block name
-     * @param  {String}  elemKey    Element name
+     * @param {String} blockName
+     * @param {String} elemKey
      * @return {String}
      */
     _buildElemClass: function(blockName, elemKey) {
@@ -514,9 +509,9 @@
      * Build class name for modifier.
      * @protected
      *
-     * @param  {String}  blockName  Block name
-     * @param  {String}  modKey     Modifier key
-     * @param  {String}  modVal     Modifier value
+     * @param {String} blockName
+     * @param {String} modKey
+     * @param {String} modVal
      * @return {String}
      */
     _buildModClass: function(baseClass, modKey, modVal) {
@@ -525,11 +520,11 @@
 
 
     /**
-     * Build selector from object or string for declarator.
+     * Build selector from object or string.
      * @private
      *
-     * @param  {String|Object}  Selector name
-     * @param  {String}         Selector prefix
+     * @param {String|Object}
+     * @param {String}
      * @return {String}
      */
     _buildSelector: function(selector, prefix) {
@@ -552,10 +547,9 @@
         }
       }
 
-      return buildSelector != undefined?
-        prefix + buildSelector:
-        prefix + selector
-      ;
+      return buildSelector != undefined
+        ? prefix + buildSelector
+        : prefix + selector;
     },
 
 
@@ -563,8 +557,8 @@
      * Build class name for block.
      * @protected
      *
-     * @param  {Object|String}  $this    DOM element or class names
-     * @param  {Integer}        [index]  Main class index 
+     * @param {Object|String} $this
+     * @param {Number} [index]
      * @return {String}
      */
     _getBlockClass: function($this, index) {
@@ -584,7 +578,7 @@
      * Get base class from element.
      * @protected
      *
-     * @param  {Object}  $this  DOM element
+     * @param {Object} $this
      * @return {String}
      */
     _getBaseClass: function($this) {
@@ -607,7 +601,7 @@
      * Get class type.
      * @protected
      *
-     * @param  {String}  className  Class name
+     * @param {String} className
      * @return {String}
      */
     _getClassType: function(className) {
@@ -629,6 +623,10 @@
 
   };
 
+  /**
+   * Create BEM instance.
+   */
+
   $.BEM = new BEM({
     namePrefix: '^[a-zA-Z0-9]{1,2}-',
     namePattern: '[a-zA-Z0-9-]+',
@@ -636,6 +634,10 @@
     modPrefix: '_',
     modDlmtr: '_'
   });
+
+  /**
+   * Extend jQuery object.
+   */
 
   $.fn.extend({
     root: function(elem) {
