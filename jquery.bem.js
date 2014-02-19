@@ -541,14 +541,11 @@
      */
     _getBlockClass: function($this, index) {
       var blockClasses = this._extractBlocks($this);
+      var index = index || 0;
 
-      if (index !== 0) {
-        var index = index || blockClasses.length - 1;
-      }
-
-      return index <= blockClasses.length - 1?
-        blockClasses[index] : null
-      ;
+      return index <= blockClasses.length - 1
+        ? blockClasses[index]
+        : null;
     },
 
     /**
@@ -567,6 +564,7 @@
 
         if (classType && classType != 'mod') {
           baseClass = sel;
+          return false;
         }
       });
 
