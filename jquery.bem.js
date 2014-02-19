@@ -59,14 +59,14 @@
 
       $.each(props, function(key, fn) {
         if (typeof fn == 'function') {
-          
+
           if (key.indexOf('on') == 0) {
             var event = key.replace(/^on/, '').toLowerCase();
-            
+
             $(selector).on(event, function(e) {
               var args = Array.prototype.slice.call(arguments);
               var $this = $(this); $this.selector = selector;
-              
+
               args.unshift($this);
               e.stopPropagation();
               return fn.apply(scope, args);
@@ -75,11 +75,11 @@
           }
           else if (key.indexOf('live') == 0) {
             var event = key.replace(/^live/, '').toLowerCase();
-            
+
             $(document).on(event, selector, function(e) {
               var args = Array.prototype.slice.call(arguments);
               var $this = $(this); $this.selector = selector;
-              
+
               args.unshift($this);
               e.stopPropagation();
               return fn.apply(scope, args);
@@ -90,7 +90,7 @@
           var key = key.replace(/[A-Z]/g, '-$&').toLowerCase();
           var block = self._getBlockClass(selector);
           var elem = self._buildElemClass(block, key);
-          
+
           self.decl(elem, fn, scope, 'recursive');
         }
       });
@@ -115,14 +115,13 @@
         , block = $this.closest('.' + blockClass);
 
       block.selector = blockClass;
-      
+
       if (elem) {
         return block.elem(elem);
       }
 
       return block;
     },
-
 
     /**
      * Switch block context.
@@ -143,7 +142,6 @@
       return $this;
     },
 
-
     /**
      * Find element in block.
      * @public
@@ -160,7 +158,6 @@
       return elem;
     },
 
-
     /**
      * Get value of modifier.
      * @public
@@ -171,11 +168,10 @@
      */
     getMod: function($this, modKey) {
       var mods = this._extractMods($this.first());
-      
+
       if (mods[modKey] != undefined) return mods[modKey];
       return null;
     },
-
 
     /**
      * Check modifier of element.
@@ -199,7 +195,6 @@
 
       return false;
     },
-
 
     /**
      * Set modifier on element.
@@ -228,15 +223,14 @@
         }
 
         var newModName = self._buildModClass(baseName, modKey, modVal);
-        
+
         current
           .addClass(newModName)
           .trigger('setmod', [modKey, modVal]);
       });
-      
+
       return $this;
     },
-
 
     /**
      * Delete modifier on element.
@@ -263,7 +257,7 @@
         if (modVal) {
           if (mods[modKey] == modVal) {
             var modName = self._buildModClass(baseName, modKey, mods[modKey]);
-            
+
             current
               .removeClass(modName)
               .trigger('delmod', [modKey, modVal])
@@ -273,7 +267,7 @@
         else {
           if (mods[modKey] != undefined) {
             var modName = self._buildModClass(baseName, modKey, mods[modKey]);
-            
+
             current
               .removeClass(modName)
               .trigger('delmod', [modKey, modVal])
@@ -284,7 +278,6 @@
 
       return $this;
     },
-
 
     /**
      * Filtering elements by modifier.
@@ -330,7 +323,6 @@
       return result;
     },
 
-
     /**
      * Get block names from element.
      * @protected
@@ -341,7 +333,7 @@
     _extractBlocks: function($this) {
       var self = this, result = []
         , selectors = this._getClasses($this);
-      
+
       $.each(selectors, function(i, sel) {
         var type = self._getClassType(sel);
 
@@ -356,7 +348,6 @@
 
       return result;
     },
-
 
     /**
      * Get element names from element.
@@ -378,7 +369,6 @@
       return result;
     },
 
-
     /**
      * Get modifiers from element.
      * @protected
@@ -391,7 +381,7 @@
 
       $this.each(function() {
         var $this = $(this);
-        
+
         $.each(self._getClasses($this), function(i, className) {
           if (self._getClassType(className) == 'mod') {
             var re = self._buildModClassRe().exec(className);
@@ -401,10 +391,9 @@
           }
         });
       });
-      
+
       return result;
     },
-
 
     /**
      * Get classes names from element.
@@ -417,7 +406,7 @@
       var classes, result = [];
 
       if (typeof $this == 'object') {
-        
+
         if ($this.selector != '') {
           classes = $this.selector.split('.');
         }
@@ -432,14 +421,13 @@
       else {
         classes = $this.split('.');
       }
-      
+
       $.each(classes, function(i, className) {
         if (className != '') result.push($.trim(className));
       });
-      
+
       return result;
     },
-
 
     /**
      * Build regexp for blocks.
@@ -453,7 +441,6 @@
       );
     },
 
-
     /**
      * Build regexp for elements.
      * @protected
@@ -465,7 +452,6 @@
         this.config.namePrefix + this.config.namePattern + this.config.elemPrefix + '(' + this.config.namePattern + ')$'
       );
     },
-
 
     /**
      * Build regexp for modifiers.
@@ -479,7 +465,6 @@
       );
     },
 
-
     /**
      * Build class name for block.
      * @protected
@@ -490,7 +475,6 @@
     _buildBlockClass: function(blockName) {
       return blockName;
     },
-
 
     /**
      * Build class name for element.
@@ -504,7 +488,6 @@
       return blockName + this.config.elemPrefix + elemKey;
     },
 
-
     /**
      * Build class name for modifier.
      * @protected
@@ -517,7 +500,6 @@
     _buildModClass: function(baseClass, modKey, modVal) {
       return baseClass + this.config.modPrefix + modKey + this.config.modDlmtr + modVal;
     },
-
 
     /**
      * Build selector from object or string.
@@ -535,11 +517,11 @@
       if (typeof selector == 'object') {
         if (selector.block != undefined) {
           var buildSelector = this._buildBlockClass(selector.block);
-          
+
           if (selector.elem != undefined) {
             buildSelector = this._buildElemClass(buildSelector, selector.elem);
           }
-          
+
           if (selector.mod != undefined) {
             var mod = selector.mod.split(':');
             buildSelector = this._buildModClass(buildSelector, mod[0], mod[1]);
@@ -552,7 +534,6 @@
         : prefix + selector;
     },
 
-
     /**
      * Build class name for block.
      * @protected
@@ -563,7 +544,7 @@
      */
     _getBlockClass: function($this, index) {
       var blockClasses = this._extractBlocks($this);
-      
+
       if (index !== 0) {
         var index = index || blockClasses.length - 1;
       }
@@ -572,7 +553,6 @@
         blockClasses[index] : null
       ;
     },
-
 
     /**
      * Get base class from element.
@@ -596,7 +576,6 @@
       return baseClass;
     },
 
-
     /**
      * Get class type.
      * @protected
@@ -609,11 +588,11 @@
       if (this._buildModClassRe().test(className)) {
         return 'mod';
       }
-      
+
       else if (this._buildElemClassRe().test(className)) {
         return 'elem';
       }
-      
+
       else if (this._buildBlockClassRe().test(className)) {
         return 'block';
       }
@@ -643,7 +622,7 @@
     root: function(elem) {
       return $.BEM.getBlock(this, elem);
     },
-    
+
     elem: function(elemKey) {
       return $.BEM.findElem(this, elemKey);
     },
@@ -651,7 +630,7 @@
     ctx: function(block, elem) {
       return $.BEM.switchBlock(this, block, elem);
     },    
-    
+
     mod: function(modKey, modVal) {
       if (typeof modVal == 'undefined') {
         modVal = null;
@@ -660,27 +639,27 @@
       if (modVal === false) {
         return $.BEM.delMod(this, modKey);
       }
-      
+
       return (modVal != null)
         ? $.BEM.setMod(this, modKey, modVal)
         : $.BEM.getMod(this, modKey);
     },
-    
+
     delMod: function(modKey, modVal) {
       return $.BEM.delMod(this, modKey, modVal);
     },
-    
+
     hasMod: function(modKey, modVal) {
       return $.BEM.hasMod(this, modKey, modVal);
     },
-    
+
     byMod: function(modKey, modVal) {
       return $.BEM.byMod(this, modKey, modVal);
     },
-    
+
     byNotMod: function(modKey, modVal) {
       return $.BEM.byMod(this, modKey, modVal, 'inverse');
     }
   });
-  
+
 })(jQuery, undefined);
