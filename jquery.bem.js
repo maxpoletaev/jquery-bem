@@ -434,7 +434,7 @@
      */
     _buildBlockClassRe: function() {
       return new RegExp(
-        this.config.namePrefix + '(' + this.config.namePattern + ')$'
+        '(' + this.config.namePattern + ')$'
       );
     },
 
@@ -446,7 +446,7 @@
      */
     _buildElemClassRe: function() {
       return new RegExp(
-        this.config.namePrefix + this.config.namePattern + this.config.elemPrefix + '(' + this.config.namePattern + ')$'
+        this.config.namePattern + this.config.elemPrefix + '(' + this.config.namePattern + ')$'
       );
     },
 
@@ -458,7 +458,7 @@
      */
     _buildModClassRe: function() {
       return new RegExp(
-        this.config.namePrefix + '.*' + this.config.modPrefix + '(' + this.config.namePattern + this.config.modDlmtr + this.config.namePattern + ')$'
+        '.*' + this.config.modPrefix + '(' + this.config.namePattern + this.config.modDlmtr + this.config.namePattern + ')$'
       );
     },
 
@@ -602,7 +602,6 @@
    */
 
   $.BEM = new BEM({
-    namePrefix: '^[a-zA-Z0-9]{1,2}-',
     namePattern: '[a-zA-Z0-9-]+',
     elemPrefix: '__',
     modPrefix: '_',
