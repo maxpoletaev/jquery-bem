@@ -639,6 +639,10 @@
         : $.BEM.getMod(this, modKey);
     },
 
+    setMod: function(modKey, modVal) {
+      return $.BEM.setMod(this, modKey, modVal);
+    },
+
     delMod: function(modKey, modVal) {
       return $.BEM.delMod(this, modKey, modVal);
     },
