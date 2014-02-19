@@ -404,7 +404,7 @@
 
       if (typeof $this == 'object') {
 
-        if ($this.selector != '') {
+        if ($this.selector.indexOf('.') === 0) {
           classes = $this.selector.split('.');
         }
         else if ($this.attr('class') != undefined) {
