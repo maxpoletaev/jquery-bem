@@ -22,7 +22,7 @@
 
     /**
      * Declaration cache.
-     * @type {array}
+     * @type {Array}
      */
     this.decls = [];
 
@@ -250,9 +250,8 @@
         var current = $(this);
         current.selector = selector;
 
-        var mods = self._extractMods(current),
-          baseName = self._getBaseClass(current)
-        ;
+        var mods = self._extractMods(current)
+          , baseName = self._getBaseClass(current);
 
         if (modVal) {
           if (mods[modKey] == modVal) {
@@ -260,8 +259,7 @@
 
             current
               .removeClass(modName)
-              .trigger('delmod', [modKey, modVal])
-            ;
+              .trigger('delmod', [modKey, modVal]);
           }
         }
         else {
@@ -270,8 +268,7 @@
 
             current
               .removeClass(modName)
-              .trigger('delmod', [modKey, modVal])
-            ;
+              .trigger('delmod', [modKey, modVal]);
           }
         }
       });
