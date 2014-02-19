@@ -20,85 +20,12 @@
      */
     this.version = '1.2.0';
 
-    /**
-     * Declaration cache.
-     * @type {Array}
-     */
-    this.decls = [];
-
   };
 
   /**
    * @extends BEM
    */
   BEM.prototype = {
-
-    /**
-     * Declarator for blocks.
-     * @public
-     *
-     * @param {String|Object} $this
-     * @param {Object} props
-     * @param {Object} scope
-     * @param {Boolean} recursive
-     */
-    decl: function(selector, props, scope, recursive) {
-      var self = this
-        , props = props || {}
-        , scope = props
-        , recursive = recursive || false;
-
-      if (!recursive) {
-        decls.push({
-          selector: selector,
-          props: props
-        });
-      }
-
-      var selector = self._buildSelector(selector);
-
-      $.each(props, function(key, fn) {
-        if (typeof fn == 'function') {
-
-          if (key.indexOf('on') == 0) {
-            var event = key.replace(/^on/, '').toLowerCase();
-
-            $(selector).on(event, function(e) {
-              var args = Array.prototype.slice.call(arguments);
-              var $this = $(this); $this.selector = selector;
-
-              args.unshift($this);
-              e.stopPropagation();
-              return fn.apply(scope, args);
-            });
-
-          }
-          else if (key.indexOf('live') == 0) {
-            var event = key.replace(/^live/, '').toLowerCase();
-
-            $(document).on(event, selector, function(e) {
-              var args = Array.prototype.slice.call(arguments);
-              var $this = $(this); $this.selector = selector;
-
-              args.unshift($this);
-              e.stopPropagation();
-              return fn.apply(scope, args);
-            });
-          }
-        }
-        else if (typeof fn == 'object') {
-          var key = key.replace(/[A-Z]/g, '-$&').toLowerCase();
-          var block = self._getBlockClass(selector);
-          var elem = self._buildElemClass(block, key);
-
-          self.decl(elem, fn, scope, 'recursive');
-        }
-      });
-
-      $(function() {
-        $(selector).trigger('init');
-      });
-    },
 
     /**
      * Get parent block of element or
