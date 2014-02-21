@@ -540,7 +540,7 @@
    */
 
   $.fn.extend({
-    root: function(elem) {
+    block: function(elem) {
       return $.BEM.getBlock(this, elem);
     },
 
