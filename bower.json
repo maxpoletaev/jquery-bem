@@ -1,0 +1,22 @@
+{
+  "name": "jquery.bem",
+  "version": "1.2.0",
+  "homepage": "https://github.com/zenwalker/jquery-bem",
+  "authors": [
+    "Maxim Shkalin <dt5@bk.ru>"
+  ],
+  "description": "Plugin for comfortable work with BEM DOM from jQuery",
+  "main": "jquery.bem.js",
+  "keywords": [
+    "bem",
+    "jquery"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
