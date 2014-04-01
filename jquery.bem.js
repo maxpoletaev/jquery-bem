@@ -491,7 +491,6 @@
 
         if (classType && classType != 'mod') {
           baseClass = sel;
-          return false;
         }
       });
 
