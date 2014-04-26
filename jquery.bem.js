@@ -18,7 +18,7 @@
      * Pugin version.
      * @type {String}
      */
-    this.version = '1.2.0';
+    this.version = '1.3.0';
 
   };
 
@@ -110,14 +110,13 @@
      * @return {Boolean}
      */
     hasMod: function($this, modKey, modVal) {
-      var mods = this._extractMods($this.first())
-        , modVal = modVal || null;
+      var mods = this._extractMods($this.first());
 
       if (modVal) {
         if (mods[modKey] == modVal) return true;
       }
       else {
-        if (mods[modKey] != undefined) return true;
+        if (mods[modKey]) return true;
       }
 
       return false;
@@ -134,7 +133,6 @@
      */
     setMod: function($this, modKey, modVal) {
       var self = this
-        , modVal = modVal || 'true'
         , selector = $this.selector;
 
       $this.each(function() {
@@ -149,7 +147,9 @@
           current.removeClass(oldModName);
         }
 
-        var newModName = self._buildModClass(baseName, modKey, modVal);
+        if (modVal !== false) {
+          var newModName = self._buildModClass(baseName, modKey, modVal);
+        }
 
         current
           .addClass(newModName)
@@ -170,7 +170,6 @@
      */
     delMod: function($this, modKey, modVal) {
       var self = this
-        , modVal = modVal || null
         , selector = $this.selector;
 
       $this.each(function() {
@@ -183,21 +182,15 @@
         if (modVal) {
           if (mods[modKey] == modVal) {
             var modName = self._buildModClass(baseName, modKey, mods[modKey]);
-
-            current
-              .removeClass(modName)
-              .trigger('delmod', [modKey, modVal]);
           }
         }
         else {
-          if (mods[modKey] != undefined) {
-            var modName = self._buildModClass(baseName, modKey, mods[modKey]);
-
-            current
-              .removeClass(modName)
-              .trigger('delmod', [modKey, modVal]);
-          }
+          var modName = self._buildModClass(baseName, modKey, mods[modKey]);
         }
+
+        current
+          .removeClass(modName)
+          .trigger('delmod', [modKey, modVal]);
       });
 
       return $this;
@@ -311,7 +304,13 @@
             var re = self._buildModClassRe().exec(className);
             var modName = re[1].split(self.config.modDlmtr);
 
-            result[ modName[0] ] = modName[1];
+            if (modName[1] !== undefined && modName[1] !== false) {
+              var modVal = modName[1];
+            } else {
+              var modVal = true;
+            }
+
+            result[ modName[0] ] = modVal;
           }
         });
       });
@@ -385,7 +384,7 @@
      */
     _buildModClassRe: function() {
       return new RegExp(
-        '^.*' + this.config.modPrefix + '(' + this.config.namePattern + this.config.modDlmtr + this.config.namePattern + ')$'
+        '^(?:' + this.config.namePattern + '|' + this.config.namePattern + this.config.elemPrefix + this.config.namePattern + ')' + this.config.modPrefix + '(' + this.config.namePattern + '((' + this.config.modDlmtr + this.config.namePattern + ')$|$))'
       );
     },
 
@@ -422,7 +421,11 @@
      * @return {String}
      */
     _buildModClass: function(baseClass, modKey, modVal) {
-      return baseClass + this.config.modPrefix + modKey + this.config.modDlmtr + modVal;
+      if (modVal !== undefined && modVal !== true) {
+        return baseClass + this.config.modPrefix + modKey + this.config.modDlmtr + modVal;
+      } else {
+        return baseClass + this.config.modPrefix + modKey;
+      }
     },
 
     /**
