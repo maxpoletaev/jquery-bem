@@ -23,7 +23,6 @@ Selecting elements
 ```javascript
 $('.b-product:first').elem('name');                 // $('.b-product:first > .b-product__name')
 $('.b-product:first').elem('name').block();         // $('.b-product:first > .b-product__name').closest('.b-product')
-$('.b-product:first').elem('name').block('price');  // $('.b-product:first > .b-product__name').siblings('.b-product__price')
 ```
 
 
@@ -38,7 +37,7 @@ Working with modifiers
 
 ```javascript
 $('.b-product').mod('theme', 'premium');  // will get .b-product.b-product_theme_premium
-$('.b-product').mod('premium', true);     // will get .b-product.b-product_premium_true
+$('.b-product').mod('premium', true);     // will get .b-product.b-product_premium
 ```
 
 ### Remove modifier
