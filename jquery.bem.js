@@ -14,12 +14,6 @@
      */
     this.config = config || {};
 
-    /**
-     * Pugin version.
-     * @type {String}
-     */
-    this.version = '1.3.0';
-
   };
 
   /**
@@ -28,25 +22,17 @@
   BEM.prototype = {
 
     /**
-     * Get parent block of element or
-     * get siblings of element.
+     * Get parent block of element.
      * @public
      *
      * @param {Object} $this
-     * @param {String} elem
      * @return {Object}
      */
-    getBlock: function($this, elem) {
-      var elem = elem || null
-        , blockClass = this._getBlockClass($this)
+    getBlock: function($this) {
+      var blockClass = this._getBlockClass($this)
         , block = $this.closest('.' + blockClass);
 
       block.selector = blockClass;
-
-      if (elem) {
-        return block.elem(elem);
-      }
-
       return block;
     },
 
@@ -542,8 +528,8 @@
    */
 
   $.fn.extend({
-    block: function(elem) {
-      return $.BEM.getBlock(this, elem);
+    block: function() {
+      return $.BEM.getBlock(this);
     },
 
     elem: function(elemKey) {
@@ -552,7 +538,7 @@
 
     ctx: function(block, elem) {
       return $.BEM.switchBlock(this, block, elem);
-    },    
+    },
 
     mod: function(modKey, modVal) {
       if (typeof modVal == 'undefined') {
