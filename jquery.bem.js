@@ -124,16 +124,16 @@
       var current = $(this);
       current.selector = selector;
 
-      var mods = self._extractMods(current)
-        , baseName = self._getBaseClass(current);
+      var mods = self.extractMods(current)
+        , baseName = self.getBaseClass(current);
 
       if (mods[modKey] != undefined) {
-        var oldModName = self._buildModClass(baseName, modKey, mods[modKey]);
+        var oldModName = self.buildModClass(baseName, modKey, mods[modKey]);
         current.removeClass(oldModName);
       }
 
       if (modVal !== false) {
-        var newModName = self._buildModClass(baseName, modKey, modVal);
+        var newModName = self.buildModClass(baseName, modKey, modVal);
       }
 
       current
@@ -161,16 +161,16 @@
       var current = $(this);
       current.selector = selector;
 
-      var mods = self._extractMods(current)
-        , baseName = self._getBaseClass(current);
+      var mods = self.extractMods(current)
+        , baseName = self.getBaseClass(current);
 
       if (modVal) {
         if (mods[modKey] == modVal) {
-          var modName = self._buildModClass(baseName, modKey, mods[modKey]);
+          var modName = self.buildModClass(baseName, modKey, mods[modKey]);
         }
       }
       else {
-        var modName = self._buildModClass(baseName, modKey, mods[modKey]);
+        var modName = self.buildModClass(baseName, modKey, mods[modKey]);
       }
 
       current
@@ -202,17 +202,17 @@
       var current = $(this);
       current.selector = selector;
 
-      var mods = self._extractMods(current)
-        , baseName = self._getBaseClass(current);
+      var mods = self.extractMods(current)
+        , baseName = self.getBaseClass(current);
 
       if (modVal) {
         if (mods[modKey] == modVal) {
-          var modName = self._buildModClass(baseName, modKey, mods[modKey]);
+          var modName = self.buildModClass(baseName, modKey, mods[modKey]);
         }
       }
       else {
         if (mods[modKey] != undefined) {
-          var modName = self._buildModClass(baseName, modKey, mods[modKey]);
+          var modName = self.buildModClass(baseName, modKey, mods[modKey]);
         }
       }
 
@@ -237,7 +237,7 @@
       , selectors = this.getClasses($this);
 
     $.each(selectors, function(i, sel) {
-      var type = self._getClassType(sel);
+      var type = self.getClassType(sel);
 
       if (type == 'block') {
         result.push(sel);
@@ -261,8 +261,8 @@
   BEM.prototype.extractElems = function($this) {
     var self = this, result = [];
 
-    $.each(self._getClasses($this), function(i, className) {
-      if (self._getClassType(className) == 'elem') {
+    $.each(self.getClasses($this), function(i, className) {
+      if (self.getClassType(className) == 'elem') {
         var elemName = className.split(self.config.elemPrefix);
         result.push(elemName[1]);
       }
@@ -284,9 +284,9 @@
     $this.each(function() {
       var $this = $(this);
 
-      $.each(self._getClasses($this), function(i, className) {
-        if (self._getClassType(className) == 'mod') {
-          var re = self._buildModClassRe().exec(className);
+      $.each(self.getClasses($this), function(i, className) {
+        if (self.getClassType(className) == 'mod') {
+          var re = self.buildModClassRe().exec(className);
           var modName = re[1].split(self.config.modDlmtr);
 
           if (modName[1] !== undefined && modName[1] !== false) {
@@ -475,7 +475,7 @@
     var selectors = this.getClasses($this);
 
     $.each(selectors, function(i, sel) {
-      var classType = self._getClassType(sel);
+      var classType = self.getClassType(sel);
 
       if (classType && classType != 'mod') {
         baseClass = sel;
