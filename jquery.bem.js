@@ -14,6 +14,10 @@
      */
     this.config = config || {};
 
+    this.blockClassRe = this.buildBlockClassRe();
+    this.elemClassRe = this.buildElemClassRe();
+    this.modClassRe = this.buildModClassRe();
+
   };
 
   /**
@@ -24,7 +28,7 @@
    * @return {Object}
    */
   BEM.prototype.getBlock = function($this) {
-    var blockClass = this._getBlockClass($this)
+    var blockClass = this.getBlockClass($this)
       , block = $this.closest('.' + blockClass);
 
     block.selector = blockClass;
@@ -44,8 +48,8 @@
     var elem = elem || null;
 
     elem
-      ? $this.selector = this._buildSelector({ block: block, elem: elem })
-      : $this.selector = this._buildSelector({ block: block });
+      ? $this.selector = this.buildSelector({ block: block, elem: elem })
+      : $this.selector = this.buildSelector({ block: block });
 
     return $this;
   };
@@ -59,8 +63,8 @@
    * @return {Object}
    */
   BEM.prototype.findElem = function($this, elemKey) {
-    var blockClass = this._getBlockClass($this)
-      , elemName = this._buildElemClass(blockClass, elemKey)
+    var blockClass = this.getBlockClass($this)
+      , elemName = this.buildElemClass(blockClass, elemKey)
       , elem = $this.find('.' + elemName);
 
     return elem;
@@ -75,7 +79,7 @@
    * @return {String}
    */
   BEM.prototype.getMod = function($this, modKey) {
-    var mods = this._extractMods($this.first());
+    var mods = this.extractMods($this.first());
 
     if (mods[modKey] != undefined) return mods[modKey];
     return null;
@@ -91,7 +95,7 @@
    * @return {Boolean}
    */
   BEM.prototype.hasMod = function($this, modKey, modVal) {
-    var mods = this._extractMods($this.first());
+    var mods = this.extractMods($this.first());
 
     if (modVal) {
       if (mods[modKey] == modVal) return true;
@@ -228,9 +232,9 @@
    * @param {Object|String} $this
    * @return {Object}
    */
-  BEM.prototype._extractBlocks = function($this) {
+  BEM.prototype.extractBlocks = function($this) {
     var self = this, result = []
-      , selectors = this._getClasses($this);
+      , selectors = this.getClasses($this);
 
     $.each(selectors, function(i, sel) {
       var type = self._getClassType(sel);
@@ -254,7 +258,7 @@
    * @param {Object} $this
    * @return {Object}
    */
-  BEM.prototype._extractElems = function($this) {
+  BEM.prototype.extractElems = function($this) {
     var self = this, result = [];
 
     $.each(self._getClasses($this), function(i, className) {
@@ -274,7 +278,7 @@
    * @param {Object} $this
    * @return {Object}
    */
-  BEM.prototype._extractMods = function($this) {
+  BEM.prototype.extractMods = function($this) {
     var self = this, result = {};
 
     $this.each(function() {
@@ -306,7 +310,7 @@
    * @param {Object} $this
    * @return {Object}
    */
-  BEM.prototype._getClasses = function($this) {
+  BEM.prototype.getClasses = function($this) {
     var classes, result = [];
 
     if (typeof $this == 'object') {
@@ -339,7 +343,7 @@
    *
    * @return {RegExp}
    */
-  BEM.prototype._buildBlockClassRe = function() {
+  BEM.prototype.buildBlockClassRe = function() {
     return new RegExp(
       '^(' + this.config.namePattern + ')$'
     );
@@ -351,7 +355,7 @@
    *
    * @return {RegExp}
    */
-  BEM.prototype._buildElemClassRe = function() {
+  BEM.prototype.buildElemClassRe = function() {
     return new RegExp(
       '^' + this.config.namePattern + this.config.elemPrefix + '(' + this.config.namePattern + ')$'
     );
@@ -363,7 +367,7 @@
    *
    * @return {RegExp}
    */
-  BEM.prototype._buildModClassRe = function() {
+  BEM.prototype.buildModClassRe = function() {
     return new RegExp(
       '^(?:' + this.config.namePattern + '|' + this.config.namePattern + this.config.elemPrefix + this.config.namePattern + ')' + this.config.modPrefix + '(' + this.config.namePattern + '((' + this.config.modDlmtr + this.config.namePattern + ')$|$))'
     );
@@ -376,7 +380,7 @@
    * @param {String} blockName
    * @return {String}
    */
-  BEM.prototype._buildBlockClass = function(blockName) {
+  BEM.prototype.buildBlockClass = function(blockName) {
     return blockName;
   };
 
@@ -388,7 +392,7 @@
    * @param {String} elemKey
    * @return {String}
    */
-  BEM.prototype._buildElemClass = function(blockName, elemKey) {
+  BEM.prototype.buildElemClass = function(blockName, elemKey) {
     return blockName + this.config.elemPrefix + elemKey;
   };
 
@@ -401,7 +405,7 @@
    * @param {String} modVal
    * @return {String}
    */
-  BEM.prototype._buildModClass = function(baseClass, modKey, modVal) {
+  BEM.prototype.buildModClass = function(baseClass, modKey, modVal) {
     if (modVal !== undefined && modVal !== true) {
       return baseClass + this.config.modPrefix + modKey + this.config.modDlmtr + modVal;
     } else {
@@ -417,22 +421,22 @@
    * @param {String}
    * @return {String}
    */
-  BEM.prototype._buildSelector = function(selector, prefix) {
+  BEM.prototype.buildSelector = function(selector, prefix) {
     if (prefix !== '') {
       var prefix = prefix || '.';
     }
 
     if (typeof selector == 'object') {
       if (selector.block != undefined) {
-        var buildSelector = this._buildBlockClass(selector.block);
+        var buildSelector = this.buildBlockClass(selector.block);
 
         if (selector.elem != undefined) {
-          buildSelector = this._buildElemClass(buildSelector, selector.elem);
+          buildSelector = this.buildElemClass(buildSelector, selector.elem);
         }
 
         if (selector.mod != undefined) {
           var mod = selector.mod.split(':');
-          buildSelector = this._buildModClass(buildSelector, mod[0], mod[1]);
+          buildSelector = this.buildModClass(buildSelector, mod[0], mod[1]);
         }
       }
     }
@@ -450,8 +454,8 @@
    * @param {Number} [index]
    * @return {String}
    */
-  BEM.prototype._getBlockClass = function($this, index) {
-    var blockClasses = this._extractBlocks($this);
+  BEM.prototype.getBlockClass = function($this, index) {
+    var blockClasses = this.extractBlocks($this);
     var index = index || 0;
 
     return index <= blockClasses.length - 1
@@ -466,9 +470,9 @@
    * @param {Object} $this
    * @return {String}
    */
-  BEM.prototype._getBaseClass = function($this) {
+  BEM.prototype.getBaseClass = function($this) {
     var self = this, baseClass = null;
-    var selectors = this._getClasses($this);
+    var selectors = this.getClasses($this);
 
     $.each(selectors, function(i, sel) {
       var classType = self._getClassType(sel);
@@ -488,14 +492,14 @@
    * @param {String} className
    * @return {String}
    */
-  BEM.prototype._getClassType = function(className) {
-    if (this._buildModClassRe().test(className)) {
+  BEM.prototype.getClassType = function(className) {
+    if (this.modClassRe.test(className)) {
       return 'mod';
     }
-    else if (this._buildElemClassRe().test(className)) {
+    else if (this.elemClassRe.test(className)) {
       return 'elem';
     }
-    else if (this._buildBlockClassRe().test(className)) {
+    else if (this.blockClassRe.test(className)) {
       return 'block';
     }
     return null;
