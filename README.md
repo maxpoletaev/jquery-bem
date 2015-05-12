@@ -1,13 +1,8 @@
-jQuery.BEM
-==========
+# jQuery.BEM
 
-jQuery.BEM is small jQuery plugin for comfortable working with HTML made by BEM method.
+jQuery.BEM is small jQuery plugin for comfortable working with HTML made by BEM methodology. 
 
- * Learn more about BEM: http://bem.info/ 
-
-
-Selecting elements
-------------------
+## Selecting elements
 
 ```html
 <div class="b-product">
@@ -25,9 +20,7 @@ $('.b-product:first').elem('name');                 // $('.b-product:first > .b-
 $('.b-product:first').elem('name').block();         // $('.b-product:first > .b-product__name').closest('.b-product')
 ```
 
-
-Working with modifiers
-----------------------
+## Working with modifiers
 
 ### Setting modifier
 
@@ -86,4 +79,29 @@ $('.b-product').hasMod('theme', 'discount')  // false
 $('.b-product').byMod('theme', 'premium');     // instead of $('.b-product.b-product_theme_premium')
 $('.b-product').byNotMod('theme', 'premium');  // instead of $('.b-product').not('.b-product_theme_premium')
 $('.b-product').byMod('theme');                // filtering by modifier "theme" of any value (?)
+```
+
+### Events
+
+You can subscribe to `setmod` and `delmod` events for obtain modifier data at the time thier setting or removal.
+
+```js
+$('.block').on('setmod', function(e, modKey, modVal) {});
+$('.block').on('delmod', function(e, modKey, modVal) {});
+```
+
+## Switching context
+
+Use `.ctx` function for change block context. For sample:
+
+```html
+<div class="block">
+  <div class="block__elem some-block">
+    <div class="some-block__elem"></div>
+  </div>
+</div>
+```
+
+```js
+$('.block').elem('elem').ctx('some-block').elem('elem');
 ```
