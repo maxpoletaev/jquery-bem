@@ -17,7 +17,6 @@
     this.blockClassRe = this.buildBlockClassRe();
     this.elemClassRe = this.buildElemClassRe();
     this.modClassRe = this.buildModClassRe();
-
   };
 
   /**
@@ -280,13 +279,15 @@
    */
   BEM.prototype.extractMods = function($this) {
     var self = this, result = {};
+    var ctx = $this.selector;
 
     $this.each(function() {
       var $this = $(this);
+      $this.selector = ctx;
 
       $.each(self.getClasses($this), function(i, className) {
         if (self.getClassType(className) == 'mod') {
-          var re = self.buildModClassRe().exec(className);
+          var re = self.modClassRe.exec(className);
           var modName = re[1].split(self.config.modDlmtr);
 
           if (modName[1] !== undefined && modName[1] !== false) {
@@ -311,27 +312,31 @@
    * @return {Object}
    */
   BEM.prototype.getClasses = function($this) {
+    var block = $this.selector.slice(1);
     var classes, result = [];
 
     if (typeof $this == 'object') {
-
-      if ($this.selector.indexOf('.') === 0) {
-        classes = $this.selector.split('.');
-      }
-      else if ($this.attr('class') != undefined) {
+      if ($this.attr('class') != undefined) {
         classes = $this.attr('class').split(' ');
       }
       else {
         return null;
       }
-
     }
     else {
       classes = $this.split('.');
     }
 
     $.each(classes, function(i, className) {
-      if (className != '') result.push($.trim(className));
+      if (className) {
+        if (block) {
+          if (className.indexOf(block) === 0) {
+            result.push($.trim(className));
+          }
+        } else {
+          result.push($.trim(className));
+        }
+      }
     });
 
     return result;

@@ -64,3 +64,15 @@ QUnit.test('selecting elements', function(assert) {
     'selecting element'
   );
 });
+
+QUnit.test('extracting modifiers', function(assert) {
+  var $block = $('#block-with-mods');
+
+  assert.deepEqual($.BEM.extractMods($block.ctx('foo')), { js: 'inited' },
+    'block with modifiers'
+  );
+
+  assert.deepEqual($.BEM.extractMods($block.ctx('bar')), {},
+    'block without modifiers'
+  );
+});
