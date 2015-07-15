@@ -565,6 +565,25 @@
 
     byNotMod: function(modKey, modVal) {
       return $.BEM.byMod(this, modKey, modVal, 'inverse');
+    },
+
+    /**
+     * Toggle blocks's or elem's modifier `modKey` between `modVal1` and `modVal2`
+     * @param {String} modKey
+     * @param {String} modVal1
+     * @param {String} modVal2
+     * @return {*}
+     */
+    toggleMod: function (modKey, modVal1, modVal2) {
+      if (this.hasMod(modKey, modVal1)) {
+        return this
+            .delMod(modKey, modVal1)
+            .setMod(modKey, modVal2);
+      } else {
+        return this
+            .delMod(modKey, modVal2)
+            .setMod(modKey, modVal1);
+      }
     }
   });
 
