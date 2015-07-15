@@ -68,6 +68,21 @@ $('.b-product').hasMod('theme', 'premium');  // true
 $('.b-product').hasMod('theme', 'discount')  // false
 ```
 
+### Toggle modifier
+
+```html
+<div class="b-product">...</div>
+```
+
+```javascript
+$('.b-product').toggleMod('theme', 'premium', 'discount');
+$('.b-product').hasMod('theme', 'premium');  // true
+$('.b-product').hasMod('theme', 'discount')  // false
+$('.b-product').toggleMod('theme', 'premium', 'discount');
+$('.b-product').hasMod('theme', 'premium');  // false
+$('.b-product').hasMod('theme', 'discount')  // true
+```
+
 ### Filtering by modifier
 
 ```html
