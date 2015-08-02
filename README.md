@@ -40,7 +40,7 @@ $('.b-product').mod('premium', true);     // will get .b-product.b-product_premi
 ```
 
 ```javascript
-$('.b-product').delMod('theme', 'premium');  // $('.b-product').removeClass('.b-product_theme_premium');
+$('.b-product').delMod('theme', 'premium');  // $('.b-product').removeClass('b-product_theme_premium');
 $('.b-product').delMod('theme');             // remove the modifier "theme" of any value (.b-product_theme_*)
 $('.b-product').mod('theme', false);         // same
 ```
