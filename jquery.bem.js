@@ -7,17 +7,29 @@
    * @constructor
    */
   function BEM(config) {
+    this.setConfig(config);
+  };
 
-    /**
-     * Default configuration.
-     * @type {Object}
-     */
-    this.config = config || {};
+  /**
+   * Set the config for the plugin
+   * @param {Object} config - defaults in br
+   * @param {String} [config.elemPrefix] - Element prefix (default: '__')
+   * @param {String} [config.modPrefix] - Modifier prefix (default: '_')
+   * @param {String} [config.modDlmtr] - Modifier delimiter (default: '_')
+   * @param {String} [config.namePattern] -
+   *   Pattern to match valid block names (default: '[a-zA-Z0-9-]+')
+   */
+  BEM.prototype.setConfig = function(config) {
+    this.config = $.extend({}, {
+      namePattern: '[a-zA-Z0-9-]+',
+      elemPrefix: '__',
+      modPrefix: '_',
+      modDlmtr: '_'
+    }, config);
 
     this.blockClassRe = this.buildBlockClassRe();
     this.elemClassRe = this.buildElemClassRe();
     this.modClassRe = this.buildModClassRe();
-
   };
 
   /**
@@ -508,18 +520,11 @@
   /**
    * Create BEM instance.
    */
-
-  $.BEM = new BEM({
-    namePattern: '[a-zA-Z0-9-]+',
-    elemPrefix: '__',
-    modPrefix: '_',
-    modDlmtr: '_'
-  });
+  $.BEM = new BEM();
 
   /**
    * Extend jQuery object.
    */
-
   $.fn.extend({
     block: function() {
       return $.BEM.getBlock(this);
