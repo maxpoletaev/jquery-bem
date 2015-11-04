@@ -76,8 +76,8 @@
    */
   BEM.prototype.findElem = function($this, elemKey) {
     var blockClass = this.getBlockClass($this)
-      , elemSelector = '.' + this.buildElemClass(blockClass, elemKey)
-      , elem = $this.is(elemSelector) ? $this : $this.find(elemSelector);
+      , elemName = this.buildElemClass(blockClass, elemKey)
+      , elem = $this.find('.' + elemName);
 
     return elem;
   };
@@ -530,13 +530,8 @@
       return $.BEM.getBlock(this);
     },
 
-    elem: function(ctx, elemKey) {
-      if (!elemKey) {
-        elemKey = ctx;
-        delete ctx;
-      }
-
-      return $.BEM.findElem(ctx || this, elemKey);
+    elem: function(elemKey) {
+      return $.BEM.findElem(this, elemKey);
     },
 
     ctx: function(block, elem) {
