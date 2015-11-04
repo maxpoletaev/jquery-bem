@@ -108,4 +108,8 @@ QUnit.test('selecting elements', function(assert) {
   assert.equal($block.ctx('block').elem('elem')[0], $elem[0],
     'selecting element'
   );
+
+  assert.equal($block.ctx('block').elem($elem, 'elem')[0], $elem[0],
+    'selecting element on specified context'
+  );
 });
