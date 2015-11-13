@@ -1,0 +1,15 @@
+{
+  "name": "jquery-bem",
+  "version": "1.3.0",
+  "description": "Plugin for comfortable work with BEM DOM from jQuery",
+  "main": "jquery.bem.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zenwalker/jquery-bem.git"
+  },
+  "author": "zenwalker",
+  "bugs": {
+    "url": "https://github.com/zenwalker/jquery-bem/issues"
+  },
+  "homepage": "https://github.com/zenwalker/jquery-bem"
+}
