@@ -15,8 +15,15 @@ jQuery.BEM is small jQuery plugin for comfortable working with HTML made by BEM 
 </div>
 ```
 
+### Getting block
+
 ```javascript
-$('.b-product:first').elem('name');                 // $('.b-product:first > .b-product__name')
+$('.b-product:first').elem('name').block();         // $('.b-product:first > .b-product__name').closest('.b-product')
+```
+
+### Getting element
+
+```javascript
 $('.b-product:first').elem('name').block();         // $('.b-product:first > .b-product__name').closest('.b-product')
 ```
 
