@@ -51,7 +51,6 @@
     var blockClass = this.getBlockClass($this)
       , block = $this.closest('.' + blockClass);
 
-    block.selector = blockClass;
     return block;
   };
 
@@ -137,12 +136,10 @@
    * @param {Object}
    */
   BEM.prototype.setMod = function($this, modKey, modVal) {
-    var self = this
-      , selector = $this.selector;
+    var self = this;
 
     $this.each(function() {
       var current = $(this);
-      current.selector = selector;
 
       var mods = self.extractMods(current)
         , baseName = self.getBaseClass(current);
@@ -174,12 +171,10 @@
    * @param {Object}
    */
   BEM.prototype.delMod = function($this, modKey, modVal) {
-    var self = this
-      , selector = $this.selector;
+    var self = this;
 
     $this.each(function() {
       var current = $(this);
-      current.selector = selector;
 
       var mods = self.extractMods(current)
         , baseName = self.getBaseClass(current);
@@ -215,12 +210,10 @@
     var self = this
       , modVal = modVal || null
       , inverse = inverse || false
-      , selector = $this.selector
       , result = $();
 
     $this.each(function() {
       var current = $(this);
-      current.selector = selector;
 
       var mods = self.extractMods(current)
         , baseName = self.getBaseClass(current);
@@ -241,7 +234,6 @@
         : current.filter('.' + modName));
     });
 
-    result.selector = selector;
     return result;
   };
 
@@ -334,17 +326,12 @@
     var classes, result = [];
 
     if (typeof $this == 'object') {
-
-      if ($this.selector.indexOf('.') === 0) {
-        classes = $this.selector.split('.');
-      }
-      else if ($this.attr('class') != undefined) {
+      if ($this.attr('class') != undefined) {
         classes = $this.attr('class').split(' ');
       }
       else {
         return null;
       }
-
     }
     else {
       classes = $this.split('.');
@@ -496,7 +483,6 @@
 
     $.each(selectors, function(i, sel) {
       var classType = self.getClassType(sel);
-
       if (classType && classType != 'mod') {
         baseClass = sel;
       }
@@ -595,12 +581,12 @@
     toggleMod: function (modKey, modVal1, modVal2) {
       if (this.hasMod(modKey, modVal1)) {
         return this
-            .delMod(modKey, modVal1)
-            .setMod(modKey, modVal2);
+          .delMod(modKey, modVal1)
+          .setMod(modKey, modVal2);
       } else {
         return this
-            .delMod(modKey, modVal2)
-            .setMod(modKey, modVal1);
+          .delMod(modKey, modVal2)
+          .setMod(modKey, modVal1);
       }
     }
   });

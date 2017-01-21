@@ -102,14 +102,27 @@ QUnit.test('build selectors', function(assert) {
 });
 
 QUnit.test('selecting elements', function(assert) {
-  var $block = $('#block');
-  var $elem = $('#elem');
+  var $fixture = $('#selecting-elements');
+  var $block = $('.block', $fixture);
+  var $elem = $('.block__elem', $fixture);
+  var $subelem = $('.block__subelem', $fixture);
 
-  assert.equal($block.ctx('block').elem('elem')[0], $elem[0],
+  assert.equal($block.elem('elem')[0], $elem[0],
     'selecting element'
   );
-
-  assert.equal($block.ctx('block').elem($elem, 'elem')[0], $elem[0],
-    'selecting element on specified context'
+  assert.equal($block.elem('subelem')[0], $subelem[0],
+    'selecting subelement'
   );
+});
+
+QUnit.test('selecting elements with context', function(assert) {
+  var $fixture = $('#selecting-with-context');
+
+  var $blockA = $('.block-a', $fixture);
+  var $elemA = $('.block-a__elem', $fixture);
+  var $blockB = $('.block-b', $fixture);
+  var $elemB = $('.block-b__elem', $fixture);
+
+  assert.equal($blockA.elem('elem')[0], $elemA[0]);
+  assert.equal($blockB.elem('elem')[0], $elemB[0]);
 });
