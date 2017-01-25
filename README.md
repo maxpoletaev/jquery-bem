@@ -1,6 +1,8 @@
+**Please, read the [deprecation notice](https://github.com/zenwalker/jquery-bem/issues/22)**
+
 # jQuery.BEM
 
-jQuery.BEM is small jQuery plugin for comfortable working with HTML made by BEM methodology. 
+jQuery.BEM is small jQuery plugin for comfortable working with HTML made by BEM methodology.
 
 ## Selecting elements
 
